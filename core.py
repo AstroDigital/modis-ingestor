@@ -6,6 +6,7 @@ from codecs import getreader
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+import gippy
 if sys.version_info < (3, 0):
     from HTMLParser import HTMLParser
 else:
@@ -71,27 +72,44 @@ class LinkFinder(HTMLParser):
             self.download_link = attrs[0][1]
 
 
-def download(url, path='./'):
-    """ Get URL (without auth) and save with some name """
-    fout = os.path.join(path, os.path.basename(url))
-    auth = (os.environ.get('EARTHDATA_USER'), os.environ.get('EARTHDATA_PASS'))
-    r = requests.get(url, auth=auth, allow_redirects=False)
-    if r.status_code == 302:
+def get_stream(session, url, auth):
+    """ Traverse redirects to get the final url """
+    stream = session.get(url, auth=auth, allow_redirects=False, stream=True)
+    if stream.status_code == 302:
         link = LinkFinder()
-        link.feed(r.text)
-        url = link.download_link
+        link.feed(stream.text)
+        print('trying new link ' + link.download_link)
+        get_stream(session, link.download_link, auth)
+    elif stream.status_code == 200:
+        print(stream.text)
+        print('actually downloading')
+        return stream
     else:
         raise Exception("Earthdata Authentication Error")
 
+
+def download(url, path='./'):
+    """ Get URL and save with some name """
+    fout = os.path.join(path, os.path.basename(url))
+    auth = (os.environ.get('EARTHDATA_USER'), os.environ.get('EARTHDATA_PASS'))
     # download as stream
-    session = set_retries(2)
-    stream = session.get(url, auth=auth, stream=True)
+    session = set_retries(5)
+    stream = get_stream(session, url, auth)
     chunk_size = 1024
-    try:
-        with open(fout, 'wb') as f:
-            for chunk in stream.iter_content(chunk_size):
-                f.write(chunk)
-    except:
-        raise Exception("Problem downloading %s" % url)
+    # try:
+    with open(fout, 'wb') as f:
+        for chunk in stream.iter_content(chunk_size):
+            f.write(chunk)
+    # except:
+    #     raise Exception("Problem downloading %s" % stream)
 
     return fout
+
+
+def convert_to_geotiff(hdf, path='./'):
+    img = gippy.GeoImage(hdf, True)
+    for i, band in enumerate(img):
+        fname = hdf + '_B' + str(i)
+        a = gippy.GeoImage.create_from(img, fname, nb=1)
+        a.add_band(img[i])
+        a.save(fname)
