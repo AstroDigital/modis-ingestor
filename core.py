@@ -7,6 +7,7 @@ import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import gippy
+import boto3
 if sys.version_info < (3, 0):
     from HTMLParser import HTMLParser
 else:
@@ -16,6 +17,8 @@ else:
 PROVIDER = os.getenv('PROVIDER', 'LPDAAC_ECS')
 PRODUCT = os.getenv('PRODUCT', 'MCD43A4.006')
 PAGE_SIZE = int(os.getenv('PAGE_SIZE', '2'))
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 
 def query_cmr(start_date, end_date):
@@ -109,7 +112,33 @@ def download(url, path='./'):
 def convert_to_geotiff(hdf, path='./'):
     img = gippy.GeoImage(hdf, True)
     for i, band in enumerate(img):
-        fname = hdf + '_B' + str(i)
+        fname = hdf + '_B' + str(i).zfill(2) + '.TIF'
         a = gippy.GeoImage.create_from(img, fname, nb=1)
         a.add_band(img[i])
         a.save(fname)
+
+
+def get_product_name(filename):
+    return filename.split('.')[0] + '.' + filename.split('.')[3]
+
+
+def get_tile_id(filename):
+    return filename.split('.')[2].replace('h', '').replace('v', '/')
+
+
+def get_date(filename):
+    return filename.split('.')[1].replace('A', '')
+
+
+def push_to_s3(filename, bucket):
+    """ Copy file to S3 """
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
+    key = '%s/%s/%s/%s' % (get_product_name(filename), get_tile_id(filename),
+                           get_date(filename), os.path.basename(filename))
+    with open(filename, 'rb') as f:
+        resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read')
+    return 's3://%s/%s' % (bucket, key)
