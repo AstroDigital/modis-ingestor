@@ -21,6 +21,8 @@ PRODUCT = os.getenv('PRODUCT', 'MCD43A4.006')
 PAGE_SIZE = int(os.getenv('PAGE_SIZE', '1'))
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+EARTHDATA_USER = os.getenv('EARTHDATA_USER')
+EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 
 # for jinja2 templating
 jinja_env = Environment(
@@ -57,7 +59,7 @@ def query_cmr(start_date, end_date):
         date = entry['time_start'].split('T')[0]
         entry_meta = {'date': date}
         for url_entry in entry['links']:
-            if url_entry.get('type') == 'application/x-hdfeos':
+            if url_entry.get('type') == 'application/x-hdfeos' and 'opendap' not in url_entry.get('href'):
                 entry_meta['url'] = url_entry['href']
             if url_entry.get('type') == 'image/jpeg':
                 entry_meta['thumb'] = url_entry['href']
@@ -99,13 +101,14 @@ def get_stream(session, url, auth):
         print('actually downloading')
         return stream
     else:
+        print(stream.status_code)
         raise Exception("Earthdata Authentication Error")
 
 
 def download(url, path='./'):
     """ Get URL and save with some name """
     fout = os.path.join(path, os.path.basename(url))
-    auth = (os.environ.get('EARTHDATA_USER'), os.environ.get('EARTHDATA_PASS'))
+    auth = (EARTHDATA_USER, EARTHDATA_PASS)
     # download as stream
     session = set_retries(5)
     stream = get_stream(session, url, auth)
