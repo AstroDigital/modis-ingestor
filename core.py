@@ -120,7 +120,7 @@ def convert_to_geotiff(hdf, path='./'):
         file_names.append(metadata_fname)
     # save each band as a TIF
     for i, band in enumerate(img):
-        fname = hdf + '_B' + str(i).zfill(2) + '.TIF'
+        fname = hdf.replace('.hdf', '') + '_B' + str(i).zfill(2) + '.TIF'
         print('Writing ' + fname)
         a = gippy.GeoImage.create_from(img, fname, nb=1)
         a.add_band(img[i])
