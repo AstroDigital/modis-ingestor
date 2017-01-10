@@ -8,6 +8,8 @@ from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import gippy
 import boto3
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 if sys.version_info < (3, 0):
     from HTMLParser import HTMLParser
 else:
@@ -16,9 +18,16 @@ else:
 
 PROVIDER = os.getenv('PROVIDER', 'LPDAAC_ECS')
 PRODUCT = os.getenv('PRODUCT', 'MCD43A4.006')
-PAGE_SIZE = int(os.getenv('PAGE_SIZE', '2'))
+PAGE_SIZE = int(os.getenv('PAGE_SIZE', '1'))
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+# for jinja2 templating
+jinja_env = Environment(
+    loader=FileSystemLoader(['templates', 'lib/templates']),
+    autoescape=select_autoescape(['html', 'xml'])
+)
+template = jinja_env.get_template('index.html')
 
 
 def query_cmr(start_date, end_date):
@@ -159,3 +168,7 @@ def push_to_s3(filename, bucket, folder):
     with open(filename, 'rb') as f:
         resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read')
     return 's3://%s/%s' % (bucket, key)
+
+
+def make_index(thumb, product, files):
+    print template.render(thumb=thumb, product=product, files=files)
