@@ -1,5 +1,5 @@
 import sys
-from core import query_cmr, download, convert_to_geotiff, push_to_s3
+from core import query_cmr, download, convert_to_geotiff, push_to_s3, get_s3_folder
 
 
 def main:
@@ -8,8 +8,9 @@ def main:
     for tile in tiles:
         file = download(tile['url'])
         files = convert_to_geotiff(file)
+        folder = get_s3_folder(file)
         for f in files:
-            push_to_s3(f)
+            push_to_s3(f, 'modis-pds', folder)
 
 if __name__ == '__main__':
     main()
