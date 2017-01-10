@@ -88,20 +88,18 @@ class LinkFinder(HTMLParser):
             self.download_link = attrs[0][1]
 
 
-def get_stream(session, url, auth):
+def get_stream(session, url, auth, previous_tries):
     """ Traverse redirects to get the final url """
     stream = session.get(url, auth=auth, allow_redirects=False, stream=True)
+    # if we get back to the same url, it's time to download
+    if url in previous_tries:
+        return stream
     if stream.status_code == 302:
+        previous_tries.append(url)
         link = LinkFinder()
         link.feed(stream.text)
-        print('trying new link ' + link.download_link)
-        get_stream(session, link.download_link, auth)
-    elif stream.status_code == 200:
-        print(stream.text)
-        print('actually downloading')
-        return stream
+        return get_stream(session, link.download_link, auth, previous_tries)
     else:
-        print(stream.status_code)
         raise Exception("Earthdata Authentication Error")
 
 
@@ -111,14 +109,15 @@ def download(url, path='./'):
     auth = (EARTHDATA_USER, EARTHDATA_PASS)
     # download as stream
     session = set_retries(5)
-    stream = get_stream(session, url, auth)
+    stream = get_stream(session, url, auth, [])
     chunk_size = 1024
-    # try:
-    with open(fout, 'wb') as f:
-        for chunk in stream.iter_content(chunk_size):
-            f.write(chunk)
-    # except:
-    #     raise Exception("Problem downloading %s" % stream)
+    try:
+        with open(fout, 'wb') as f:
+            print('Writing %s' % fout)
+            for chunk in stream.iter_content(chunk_size):
+                f.write(chunk)
+    except:
+        raise Exception("Problem downloading %s" % stream)
 
     return fout
 
