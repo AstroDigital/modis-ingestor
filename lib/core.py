@@ -49,9 +49,10 @@ def query_cmr(start_date, end_date):
         for url_entry in entry['links']:
             if url_entry['type'] == 'application/x-hdfeos':
                 entry_meta['url'] = url_entry['href']
-                tile_meta.append(entry_meta)
-                break
+            if url_entry['type'] == 'image/jpeg':
+                entry_meta['thumb'] = url_entry['href']
 
+        tile_meta.append(entry_meta)
     response.close()
 
     return tile_meta

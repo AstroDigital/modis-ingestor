@@ -1,5 +1,5 @@
 import sys
-from core import query_cmr, download, convert_to_geotiff, push_to_s3, get_s3_folder
+from lib.core import query_cmr, download, convert_to_geotiff, push_to_s3, get_s3_folder
 
 
 def main:
