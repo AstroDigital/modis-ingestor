@@ -9,13 +9,8 @@ def main(date):
         # file = download(tile['url'])
         files = convert_to_geotiff(file)
         folder = get_s3_folder(file)
-
-        # create the index.html and add to the files array for uploading
-        index_fname = 'index.html'
-        with open(index_fname, 'w') as outfile:
-            html = make_index(tile['thumb'], file, files)
-            outfile.write(index)
-            files.append(index_fname)
+        index_fname = make_index(tile['thumb'], file, files)
+        files = [index_fname]
         for f in files:
             push_to_s3(f, 'modis-pds', folder)
 
