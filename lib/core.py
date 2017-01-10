@@ -168,7 +168,13 @@ def push_to_s3(filename, bucket, folder):
     key = '%s/%s' % (folder, os.path.basename(filename))
     with open(filename, 'rb') as f:
         print('Uploading %s to: %s' % (key, bucket))
-        resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read')
+        if 'html' in filename:
+            content_type = 'text/html'
+        elif 'json' in filename:
+            content_type = 'application/json'
+        else:
+            content_type = 'binary/octet-stream'
+        resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read', ContentType=content_type)
     return 's3://%s/%s' % (bucket, key)
 
 
