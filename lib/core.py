@@ -44,6 +44,7 @@ def query_cmr(start_date, end_date):
              PAGE_SIZE) + \
             '&temporal={0}T00:00:00Z,{1}T23:59:00Z'.format(
              start_date, end_date)
+    print('searching ' + query)
     try:
         response = urlopen(query)
     except HTTPError as error:
@@ -56,9 +57,9 @@ def query_cmr(start_date, end_date):
         date = entry['time_start'].split('T')[0]
         entry_meta = {'date': date}
         for url_entry in entry['links']:
-            if url_entry['type'] == 'application/x-hdfeos':
+            if url_entry.get('type') == 'application/x-hdfeos':
                 entry_meta['url'] = url_entry['href']
-            if url_entry['type'] == 'image/jpeg':
+            if url_entry.get('type') == 'image/jpeg':
                 entry_meta['thumb'] = url_entry['href']
 
         tile_meta.append(entry_meta)
@@ -131,7 +132,7 @@ def convert_to_geotiff(hdf, path='./'):
     # save each band as a TIF
     for i, band in enumerate(img):
         fname = hdf.replace('.hdf', '') + '_B' + str(i).zfill(2) + '.TIF'
-        print('Writing ' + fname)
+        print('Writing %s' % fname)
         a = gippy.GeoImage.create_from(img, fname, nb=1)
         a.add_band(img[i])
         a.save(fname)
@@ -166,9 +167,16 @@ def push_to_s3(filename, bucket, folder):
     )
     key = '%s/%s' % (folder, os.path.basename(filename))
     with open(filename, 'rb') as f:
+        print('Uploading %s to: %s' % (key, bucket))
         resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read')
     return 's3://%s/%s' % (bucket, key)
 
 
 def make_index(thumb, product, files):
-    print template.render(thumb=thumb, product=product, files=files)
+    html = template.render(thumb=thumb, product=product, files=files)
+    index_fname = 'index.html'
+    with open(index_fname, 'w') as outfile:
+        print('Writing %s' % index_fname)
+        outfile.write(html)
+
+    return index_fname
