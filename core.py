@@ -1,7 +1,7 @@
 import os
 import sys
 from urllib2 import HTTPError, urlopen
-from json import load, loads
+from json import load, loads, dump
 from codecs import getreader
 import requests
 from requests.packages.urllib3.util.retry import Retry
@@ -110,12 +110,24 @@ def download(url, path='./'):
 
 
 def convert_to_geotiff(hdf, path='./'):
+    file_names = []
     img = gippy.GeoImage(hdf, True)
+    # write out metadata
+    metadata_fname = 'metadata.json'
+    with open(metadata_fname, 'w') as outfile:
+        print('Writing metadata')
+        dump(img.meta(), outfile, sort_keys=True, indent=4, ensure_ascii=False)
+        file_names.append(metadata_fname)
+    # save each band as a TIF
     for i, band in enumerate(img):
         fname = hdf + '_B' + str(i).zfill(2) + '.TIF'
+        print('Writing ' + fname)
         a = gippy.GeoImage.create_from(img, fname, nb=1)
         a.add_band(img[i])
         a.save(fname)
+        file_names.append(fname)
+
+    return file_names
 
 
 def get_product_name(filename):
