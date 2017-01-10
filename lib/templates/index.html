@@ -5,7 +5,9 @@
     <title>{{ product }}</title>
   </head>
   <body>
+    <h1>{{ product }}</h1>
     <img src="{{ thumb }}" />
+    <h2>Files</h2>
     <ul>
       {% for file in files %}
         <li><a href="{{ file }}">{{ file }}</a></li>
