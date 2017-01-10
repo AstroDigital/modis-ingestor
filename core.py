@@ -142,15 +142,19 @@ def get_date(filename):
     return filename.split('.')[1].replace('A', '')
 
 
-def push_to_s3(filename, bucket):
+def get_s3_folder(filename):
+    return '%s/%s/%s' % (get_product_name(filename), get_tile_id(filename),
+                         get_date(filename))
+
+
+def push_to_s3(filename, bucket, folder):
     """ Copy file to S3 """
     s3 = boto3.client(
         's3',
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
-    key = '%s/%s/%s/%s' % (get_product_name(filename), get_tile_id(filename),
-                           get_date(filename), os.path.basename(filename))
+    key = '%s/%s' % (folder, os.path.basename(filename))
     with open(filename, 'rb') as f:
         resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read')
     return 's3://%s/%s' % (bucket, key)
