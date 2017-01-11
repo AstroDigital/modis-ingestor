@@ -18,7 +18,7 @@ else:
 
 PROVIDER = os.getenv('PROVIDER', 'LPDAAC_ECS')
 PRODUCT = os.getenv('PRODUCT', 'MCD43A4.006')
-PAGE_SIZE = int(os.getenv('PAGE_SIZE', '1'))
+PAGE_SIZE = int(os.getenv('PAGE_SIZE', '1000'))
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 EARTHDATA_USER = os.getenv('EARTHDATA_USER')
@@ -103,7 +103,7 @@ def get_stream(session, url, auth, previous_tries):
         raise Exception("Earthdata Authentication Error")
 
 
-def download(url, path='./'):
+def download(url, path=''):
     """ Get URL and save with some name """
     fout = os.path.join(path, os.path.basename(url))
     auth = (EARTHDATA_USER, EARTHDATA_PASS)
@@ -122,7 +122,7 @@ def download(url, path='./'):
     return fout
 
 
-def convert_to_geotiff(hdf, path='./'):
+def convert_to_geotiff(hdf, path=''):
     file_names = []
     img = gippy.GeoImage(hdf, True)
     # write out metadata
