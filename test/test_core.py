@@ -13,7 +13,6 @@ class TestCore(unittest.TestCase):
         """ Query CMR """
         q = query(self.date1, self.date1)[0]
         fname = download(q['url'], path=os.path.dirname(__file__))
-        import nose.tools; nose.tools.set_trace()
         fnames = convert_to_geotiff(fname)
         for f in fnames:
             self.assertTrue(os.path.exists(f))
