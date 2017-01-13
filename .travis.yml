@@ -1,3 +1,9 @@
+# the following envvars added via travis admin panel
+# AWS_ACCESS_KEY
+# AWS_SECRET_ACCESS_KEY
+# EARTHDATA_USER
+# EARTHDATA_PASS
+
 language: python
 
 python:
@@ -5,16 +11,6 @@ python:
 
 services:
   - docker
-
-env:
-  global:
-  - DOCKER_COMPOSE_VERSION=1.8.0
-  - AWS_ACCESS_KEY_ID=AKIAI55R6SJ4ORRFFKRA
-  - AWS_DEFAULT_REGION=us-east-1
-  - EARTHDATA_USER=devseed
-  # the following envs added via travis admin panel
-  # AWS_SECRET_ACCESS_KEY
-  # EARTHDATA_PASS
 
 install:
   - pip install awscli docker-compose==1.8.0
