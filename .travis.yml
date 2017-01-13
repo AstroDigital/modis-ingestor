@@ -24,6 +24,7 @@ install:
   - echo "EARTHDATA_PASS=$EARTHDATA_PASS" >> .env
   - echo "EARTHDATA_USER=$EARTHDATA_USER" >> .env
   - mv .env modispds/.env
+  - docker-compose build
 
 script:
 - docker-compose run test
