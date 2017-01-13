@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+
+  build:
+    build:
+      context: .
+    image: 'modispds:latest'
+
+  bash:
+    image: 'modispds:latest'
+    entrypoint: /bin/bash
+    volumes:
+      - '.:/work'
+
+  test:
+    image: 'modispds:latest'
+    entrypoint: bash -c 'pip install nose; nosetests -v -s;'
+    working_dir: /work
+    volumes:
+      - '.:/work'

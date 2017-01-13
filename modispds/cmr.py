@@ -1,38 +1,32 @@
+"""
+Client library for using NASAs CMR API for searching and downloading from NASA data holdings
+"""
+
 import os
+import requests
 import sys
 from urllib2 import HTTPError, urlopen
-from json import load, loads, dump
+from json import load
 from codecs import getreader
-import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-import gippy
-import boto3
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-
 if sys.version_info < (3, 0):
     from HTMLParser import HTMLParser
 else:
     from html.parser import HTMLParser
 
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv())
 
 PROVIDER = os.getenv('PROVIDER', 'LPDAAC_ECS')
 PRODUCT = os.getenv('PRODUCT', 'MCD43A4.006')
 PAGE_SIZE = int(os.getenv('PAGE_SIZE', '1000'))
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
 EARTHDATA_USER = os.getenv('EARTHDATA_USER')
 EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 
-# for jinja2 templating
-jinja_env = Environment(
-    loader=FileSystemLoader(['templates', 'lib/templates']),
-    autoescape=select_autoescape(['html', 'xml'])
-)
-template = jinja_env.get_template('index.html')
 
-
-def query_cmr(start_date, end_date):
+def query(start_date, end_date):
     """ Search CMR database for spectral MODIS tiles matching a temporal range,
     defined by a start date and end date. Returns metadata containing the URL of
     each image.
@@ -60,7 +54,7 @@ def query_cmr(start_date, end_date):
         entry_meta = {'date': date}
         for url_entry in entry['links']:
             if url_entry.get('type') == 'application/x-hdfeos' and 'opendap' not in url_entry.get('href'):
-                entry_meta['url'] = url_entry['href']
+                entry_meta['url'] = str(url_entry['href'])
             if url_entry.get('type') == 'image/jpeg':
                 entry_meta['thumb'] = url_entry['href']
 
@@ -120,69 +114,3 @@ def download(url, path=''):
         raise Exception("Problem downloading %s" % stream)
 
     return fout
-
-
-def convert_to_geotiff(hdf, path=''):
-    file_names = []
-    img = gippy.GeoImage(hdf, True)
-    # write out metadata
-    metadata_fname = 'metadata.json'
-    with open(metadata_fname, 'w') as outfile:
-        print('Writing metadata')
-        dump(img.meta(), outfile, sort_keys=True, indent=4, ensure_ascii=False)
-        file_names.append(metadata_fname)
-    # save each band as a TIF
-    for i, band in enumerate(img):
-        fname = hdf.replace('.hdf', '') + '_B' + str(i+1).zfill(2) + '.TIF'
-        print('Writing %s' % fname)
-        imgout = img.select([i+1]).save(fname)
-        file_names.append(fname)
-
-    return file_names
-
-
-def get_product_name(filename):
-    return filename.split('.')[0] + '.' + filename.split('.')[3]
-
-
-def get_tile_id(filename):
-    return filename.split('.')[2].replace('h', '').replace('v', '/')
-
-
-def get_date(filename):
-    return filename.split('.')[1].replace('A', '')
-
-
-def get_s3_folder(filename):
-    return '%s/%s/%s' % (get_product_name(filename), get_tile_id(filename),
-                         get_date(filename))
-
-
-def push_to_s3(filename, bucket, folder):
-    """ Copy file to S3 """
-    s3 = boto3.client(
-        's3',
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
-    )
-    key = '%s/%s' % (folder, os.path.basename(filename))
-    with open(filename, 'rb') as f:
-        print('Uploading %s to: %s' % (key, bucket))
-        if 'html' in filename:
-            content_type = 'text/html'
-        elif 'json' in filename:
-            content_type = 'application/json'
-        else:
-            content_type = 'binary/octet-stream'
-        resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read', ContentType=content_type)
-    return 's3://%s/%s' % (bucket, key)
-
-
-def make_index(thumb, product, files):
-    html = template.render(thumb=thumb, product=product, files=files)
-    index_fname = 'index.html'
-    with open(index_fname, 'w') as outfile:
-        print('Writing %s' % index_fname)
-        outfile.write(html)
-
-    return index_fname
