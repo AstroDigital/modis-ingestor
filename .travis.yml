@@ -12,6 +12,10 @@ python:
 services:
   - docker
 
+env:
+  global:
+  - AWS_DEFAULT_REGION=us-east-1
+
 install:
   - pip install awscli docker-compose==1.8.0
   - echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION" >> .env
