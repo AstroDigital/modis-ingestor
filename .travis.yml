@@ -23,7 +23,7 @@ install:
   - echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env
   - echo "EARTHDATA_PASS=$EARTHDATA_PASS" >> .env
   - echo "EARTHDATA_USER=$EARTHDATA_USER" >> .env
-  - mv .env lambda/.env
+  - mv .env modispds/.env
 
 script:
 - docker-compose run test
