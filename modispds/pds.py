@@ -23,7 +23,6 @@ template = jinja_env.get_template('index.html')
 
 def push_to_s3(filename, bucket, folder):
     """ Copy file to S3 """
-    print(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
     s3 = boto3.client(
         's3',
         aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -41,6 +40,10 @@ def push_to_s3(filename, bucket, folder):
             content_type = 'binary/octet-stream'
         resp = s3.put_object(Bucket=bucket, Key=key, Body=f, ACL='public-read', ContentType=content_type)
     return 's3://%s/%s' % (bucket, key)
+
+def del_from_s3(filename, bucket, folder):
+    """ Remove file from S3 """
+
 
 
 def make_index(thumb, product, files):

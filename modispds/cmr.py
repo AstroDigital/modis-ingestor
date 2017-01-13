@@ -26,7 +26,7 @@ EARTHDATA_USER = os.getenv('EARTHDATA_USER')
 EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 
 
-def query_cmr(start_date, end_date):
+def query(start_date, end_date):
     """ Search CMR database for spectral MODIS tiles matching a temporal range,
     defined by a start date and end date. Returns metadata containing the URL of
     each image.
@@ -54,7 +54,7 @@ def query_cmr(start_date, end_date):
         entry_meta = {'date': date}
         for url_entry in entry['links']:
             if url_entry.get('type') == 'application/x-hdfeos' and 'opendap' not in url_entry.get('href'):
-                entry_meta['url'] = url_entry['href']
+                entry_meta['url'] = str(url_entry['href'])
             if url_entry.get('type') == 'image/jpeg':
                 entry_meta['thumb'] = url_entry['href']
 

@@ -1,7 +1,7 @@
 import sys
 import time
 import os
-from modispds.cmr import query_cmr, download
+from modispds.cmr import query, download
 from modispds.pds import push_to_s3, make_index
 from json import dump
 import gippy
@@ -25,6 +25,7 @@ def get_s3_folder(filename):
 
 
 def convert_to_geotiff(hdf, path=''):
+    bname = os.path.basename(hdf)
     file_names = []
     img = gippy.GeoImage(hdf, True)
     # write out metadata
@@ -35,7 +36,7 @@ def convert_to_geotiff(hdf, path=''):
         file_names.append(metadata_fname)
     # save each band as a TIF
     for i, band in enumerate(img):
-        fname = hdf.replace('.hdf', '') + '_B' + str(i+1).zfill(2) + '.TIF'
+        fname = os.path.join(path, bname.replace('.hdf', '') + '_B' + str(i+1).zfill(2) + '.TIF')
         print('Writing %s' % fname)
         imgout = img.select([i+1]).save(fname)
         file_names.append(fname)
@@ -44,7 +45,7 @@ def convert_to_geotiff(hdf, path=''):
 
 
 def main(date):
-    products = query_cmr(date, date)
+    products = query(date, date)
     for product in products:
         product_name = str(os.path.basename(product['url'])).replace('.hdf', '')
         print('Processing tile %s' % product_name)
