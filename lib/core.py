@@ -133,15 +133,9 @@ def convert_to_geotiff(hdf, path=''):
         file_names.append(metadata_fname)
     # save each band as a TIF
     for i, band in enumerate(img):
-        gain = band.gain()
-        offset = band.offset()
-        band.set_gain(1.0)
-        band.set_offset(0.0)
         fname = hdf.replace('.hdf', '') + '_B' + str(i+1).zfill(2) + '.TIF'
         print('Writing %s' % fname)
         imgout = img.select([i+1]).save(fname)
-        imgout.set_gain(gain)
-        imgout.set_offset(offset)
         file_names.append(fname)
 
     return file_names
