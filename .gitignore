@@ -3,4 +3,6 @@
 *.json
 *.pyc
 *.html
+*.xml
+*.jpg
 .env

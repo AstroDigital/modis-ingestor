@@ -1,10 +1,12 @@
 import sys
 import time
 import os
-from modispds.cmr import query, download
+import logging
+from modispds.cmr import query, download_granule
 from modispds.pds import push_to_s3, make_index
-from json import dump
 import gippy
+
+logger = logging.getLogger(__name__)
 
 
 def get_product_name(filename):
@@ -24,42 +26,47 @@ def get_s3_folder(filename):
                          get_date(filename))
 
 
-def convert_to_geotiff(hdf, path=''):
+def convert_to_geotiff(hdf, outdir=''):
     bname = os.path.basename(hdf)
     file_names = []
     img = gippy.GeoImage(hdf, True)
-    # write out metadata
-    metadata_fname = 'metadata.json'
-    with open(metadata_fname, 'w') as outfile:
-        print('Writing metadata')
-        dump(img.meta(), outfile, sort_keys=True, indent=4, ensure_ascii=False)
-        file_names.append(metadata_fname)
     # save each band as a TIF
     for i, band in enumerate(img):
-        fname = os.path.join(path, bname.replace('.hdf', '') + '_B' + str(i+1).zfill(2) + '.TIF')
-        print('Writing %s' % fname)
+        fname = os.path.join(outdir, bname.replace('.hdf', '') + '_B' + str(i+1).zfill(2) + '.TIF')
+        logger.info('Writing %s' % fname)
         imgout = img.select([i+1]).save(fname)
         file_names.append(fname)
 
     return file_names
 
 
-def main(date):
-    products = query(date, date)
-    for product in products:
-        product_name = str(os.path.basename(product['url'])).replace('.hdf', '')
-        print('Processing tile %s' % product_name)
+def main(date, outdir=''):
+    granules = query(date, date)
+
+    for gran in granules[0:1]:
+        url = gran['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
+        bname = os.path.basename(url)
         start_time = time.time()
-        file = download(product['url'])
-        files = convert_to_geotiff(str(file))
-        folder = get_s3_folder(file)
-        index_fname = make_index(product['thumb'], file, files)
+        logger.info('Processing tile %s' % bname)
+
+        # create geotiffs
+        logger.info("Downloading granule %s" % bname)
+        fnames = download_granule(gran, outdir=outdir)
+
+        logger.info("Converting to GeoTIFFs")
+        files = convert_to_geotiff(fnames[0])
+
+        # create index.html
+        folder = get_s3_folder(bname)
+        files.extend(fnames[2:])
+        index_fname = make_index(fnames[1], bname, files)
         files.append(index_fname)
+
+        # push to s3
         for f in files:
             push_to_s3(f, 'modis-pds', folder)
 
-        elapsed_time = time.time() - start_time
-        print('Elapsed time for %s: %ss' % (product_name, str(elapsed_time)))
+        logger.info('Completed processing granule %s in : %ss' % (bname, time.time() - start_time))
 
 
 def cli():
