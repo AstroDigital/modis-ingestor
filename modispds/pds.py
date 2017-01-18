@@ -76,6 +76,7 @@ def del_from_s3(url):
 
 
 def make_index(thumb, product, files):
+    """ Create html index of files """
     html = template.render(thumb=thumb, product=product, files=files)
     index_fname = 'index.html'
     with open(index_fname, 'w') as outfile:

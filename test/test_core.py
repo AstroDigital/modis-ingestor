@@ -16,7 +16,7 @@ class TestCore(unittest.TestCase):
         self.fnames = download_granule(q[0])
 
     def test_convert_to_geotiff(self):
-        """ Query CMR """
+        """ Convert hdf to individual GeoTIFF files """
         fnames = convert_to_geotiff(self.fnames[0], outdir=os.path.dirname(__file__))
         for f in fnames:
             self.assertTrue(os.path.exists(f))

@@ -4,7 +4,6 @@ import os
 import logging
 from modispds.cmr import query, download_granule
 from modispds.pds import push_to_s3, make_index
-from json import dump
 import gippy
 
 logger = logging.getLogger(__name__)
