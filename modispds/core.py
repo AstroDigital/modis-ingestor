@@ -44,7 +44,7 @@ def convert_to_geotiff(hdf, outdir=''):
 def main(date, outdir=''):
     granules = query(date, date)
 
-    for gran in granules:
+    for gran in granules[0:1]:
         url = gran['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
         bname = os.path.basename(url)
         start_time = time.time()
@@ -59,10 +59,9 @@ def main(date, outdir=''):
 
         # create index.html
         folder = get_s3_folder(bname)
-
+        files.extend(fnames[1:])
         index_fname = make_index(fnames[1], bname, files)
         files.append(index_fname)
-        files.extend(fnames[1:])
 
         # push to s3
         for f in files:
