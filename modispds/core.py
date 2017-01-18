@@ -58,7 +58,7 @@ def main(date, outdir=''):
 
         # create index.html
         folder = get_s3_folder(bname)
-        files.extend(fnames[1:])
+        files.extend(fnames[2:])
         index_fname = make_index(fnames[1], bname, files)
         files.append(index_fname)
 
