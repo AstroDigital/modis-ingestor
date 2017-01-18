@@ -1,6 +1,6 @@
 import os
 import unittest
-from modispds.pds import push_to_s3, make_index
+from modispds.pds import push_to_s3, del_from_s3, make_index
 
 
 class TestPDS(unittest.TestCase):
@@ -9,7 +9,8 @@ class TestPDS(unittest.TestCase):
     def test_push_to_s3(self):
         """ Push file to S3 """
         url = push_to_s3(__file__, 'modis-pds', 'testing')
-        print(url)
+        del_from_s3(url)
+
 
     def test_make_index(self):
         """ Download a file from CMR """
