@@ -19,3 +19,9 @@ services:
     working_dir: /work
     volumes:
       - '.:/work'
+
+  ingest:
+    image: 'modispds:latest'
+    entrypoint: 'python modispds/core.py'
+    working_dir: /work
+
