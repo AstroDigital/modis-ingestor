@@ -1,7 +1,7 @@
 import os
 import unittest
 from modispds.cmr import query, download_granule
-from modispds.core import convert_to_geotiff
+from modispds.core import convert_to_geotiff, ingest_granule
 
 
 class TestCore(unittest.TestCase):

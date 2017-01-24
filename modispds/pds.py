@@ -4,6 +4,7 @@ Utilities for putting data up on AWS's Public Datasets (PDS)
 import os
 import logging
 import boto3
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # environment variables
 from dotenv import load_dotenv, find_dotenv
@@ -13,7 +14,7 @@ AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 
 # for jinja2 templating
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 jinja_env = Environment(
     loader=FileSystemLoader(['templates', os.path.join(os.path.dirname(__file__), 'templates')]),
     autoescape=select_autoescape(['html', 'xml'])

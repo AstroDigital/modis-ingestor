@@ -43,33 +43,38 @@ def convert_to_geotiff(hdf, outdir=''):
     return file_names
 
 
-def main(date1, date2, outdir=''):
+def ingest_granule(gran, outdir=''):
+    """ Fetch granule, process, and push to s3 """
+    url = gran['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
+    bname = os.path.basename(url)
+    start_time = time.time()
+    logger.info('Processing tile %s' % bname)
+
+    # create geotiffs
+    logger.info("Downloading granule %s" % bname)
+    fnames = download_granule(gran, outdir=outdir)
+
+    logger.info("Converting to GeoTIFFs")
+    files = convert_to_geotiff(fnames[0])
+
+    # create index.html
+    folder = get_s3_folder(bname)
+    files.extend(fnames[2:])
+    index_fname = make_index(fnames[1], bname, files)
+    files.append(index_fname)
+
+    # push to s3
+    for f in files:
+        push_to_s3(f, 'modis-pds', folder)
+
+    logger.info('Completed processing granule %s in : %ss' % (bname, time.time() - start_time))
+
+
+def ingest(date1, date2, outdir=''):
     granules = query(date1, date2)
 
-    for gran in granules[0:1]:
-        url = gran['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
-        bname = os.path.basename(url)
-        start_time = time.time()
-        logger.info('Processing tile %s' % bname)
-
-        # create geotiffs
-        logger.info("Downloading granule %s" % bname)
-        fnames = download_granule(gran, outdir=outdir)
-
-        logger.info("Converting to GeoTIFFs")
-        files = convert_to_geotiff(fnames[0])
-
-        # create index.html
-        folder = get_s3_folder(bname)
-        files.extend(fnames[2:])
-        index_fname = make_index(fnames[1], bname, files)
-        files.append(index_fname)
-
-        # push to s3
-        for f in files:
-            push_to_s3(f, 'modis-pds', folder)
-
-        logger.info('Completed processing granule %s in : %ss' % (bname, time.time() - start_time))
+    for gran in granules:
+        ingest_granule(gran, outdir=outdir)
 
 
 def parse_args(args):
@@ -87,7 +92,7 @@ def parse_args(args):
 
 def cli():
     args = parse_args(sys.argv[1:])
-    main(args.start_date, args.end_date)
+    ingest(args.start_date, args.end_date)
 
 
 if __name__ == "__main__":
