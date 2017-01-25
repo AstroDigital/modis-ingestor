@@ -1,2 +1,3 @@
+include modispds/.env
 include modispds/cmr.cfg
 include modispds/templates/index.html
