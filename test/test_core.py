@@ -29,8 +29,9 @@ class TestCore(unittest.TestCase):
         truth_path = 'MCD43A4.006/12/07/2015266'
         path = get_s3_path(self.fname)
         self.assertEqual(path, truth_path)
-        path = get_s3_path(self.fname, prefix='testing')
-        self.assertEqual(path, )
+        prefix = 'test'
+        path = get_s3_path(self.fname, prefix=prefix)
+        self.assertEqual(path, os.path.join(prefix, truth_path))
 
     def test_convert_to_geotiff(self):
         """ Convert hdf to individual GeoTIFF files """

@@ -68,17 +68,14 @@ def exists(url):
     parts = splitall(url)
     bucket = parts[1]
     key = os.path.sep.join(parts[2:])
-    ex = False
     try:
-        s3.Object(bucket, key).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            ex = False
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        return True
+    except Exception as e:
+        if e.response['Error']['Code'] == 'NoSuchKey':
+            return False
         else:
             raise
-    else:
-        ex = True
-    return ex
 
 
 def del_from_s3(url):

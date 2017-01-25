@@ -11,6 +11,10 @@ class TestPDS(unittest.TestCase):
         fname = make_index('thumbnail.jpg', 'product', ['file1.tif', 'file2.tif'])
         self.assertTrue(os.path.exists(fname))
 
+    def test_exists(self):
+        """ Check for existence of fake object """
+        self.assertFalse(exists('s3://modis-pds/nothinghere'))
+
     def test_push_to_s3(self):
         """ Push file to S3 """
         url = push_to_s3(__file__, 'modis-pds', 'testing')
