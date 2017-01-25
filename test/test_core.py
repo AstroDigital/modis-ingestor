@@ -20,7 +20,7 @@ class TestCore(unittest.TestCase):
     def test_parse_args(self):
         """ Parse arguments for CLI """
         args = '%s %s' % (self.date1, self.date1)
-        args = parse_args(args.aplit(' '))
+        args = parse_args(args.split(' '))
         self.assertEqual(args.start_date, self.date1)
         self.assertEqual(args.end_date, self.date1)
 
