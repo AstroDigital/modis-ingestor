@@ -42,6 +42,7 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
     packages=find_packages(exclude=['docs', 'test']),
+    include_package_data=True,
     entry_points={'console_scripts': console_scripts},
     install_requires=install_requires,
     tests_require=tests_require,
