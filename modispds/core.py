@@ -43,6 +43,8 @@ def ingest_granule(gran, outdir='', bucket='modis-pds', prefix=''):
     fnames = []
     for f in files:
         fnames.append(push_to_s3(f, 'modis-pds', path))
+        # cleanup
+        os.remove(f)
 
     logger.info('Completed processing granule %s in : %ss' % (bname, time.time() - start_time))
     return fnames
