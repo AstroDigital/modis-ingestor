@@ -4,6 +4,7 @@ Utilities for putting data up on AWS's Public Datasets (PDS)
 import os
 import logging
 import boto3
+import botocore
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # environment variables
@@ -23,20 +24,15 @@ template = jinja_env.get_template('index.html')
 logger = logging.getLogger(__name__)
 
 
-def splitall(path):
-    allparts = []
-    while 1:
-        parts = os.path.split(path)
-        if parts[0] == path:  # sentinel for absolute paths
-            allparts.insert(0, parts[0])
-            break
-        elif parts[1] == path:  # sentinel for relative paths
-            allparts.insert(0, parts[1])
-            break
-        else:
-            path = parts[0]
-            allparts.insert(0, parts[1])
-    return allparts
+def make_index(thumb, product, files):
+    """ Create html index of files """
+    html = template.render(thumb=thumb, product=product, files=files)
+    index_fname = 'index.html'
+    with open(index_fname, 'w') as outfile:
+        logger.info('Writing %s' % index_fname)
+        outfile.write(html)
+
+    return index_fname
 
 
 def push_to_s3(filename, bucket, prefix=''):
@@ -62,6 +58,29 @@ def push_to_s3(filename, bucket, prefix=''):
     return os.path.join('s3://%s' % bucket, key)
 
 
+def exists(url):
+    """ Check that URL exists on S3 """
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
+    parts = splitall(url)
+    bucket = parts[1]
+    key = os.path.sep.join(parts[2:])
+    ex = False
+    try:
+        s3.Object(bucket, key).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            ex = False
+        else:
+            raise
+    else:
+        ex = True
+    return ex
+
+
 def del_from_s3(url):
     """ Remove file from S3 """
     s3 = boto3.client(
@@ -76,12 +95,18 @@ def del_from_s3(url):
     res = s3.delete_object(Bucket=bucket, Key=key)
 
 
-def make_index(thumb, product, files):
-    """ Create html index of files """
-    html = template.render(thumb=thumb, product=product, files=files)
-    index_fname = 'index.html'
-    with open(index_fname, 'w') as outfile:
-        logger.info('Writing %s' % index_fname)
-        outfile.write(html)
+def splitall(path):
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path:  # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
 
-    return index_fname
