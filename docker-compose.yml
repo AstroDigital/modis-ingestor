@@ -2,20 +2,23 @@ version: '2'
 
 services:
 
-  build:
+  base:
     build:
-      context: .
-    image: 'modispds:latest'
-
-  bash:
-    image: 'modispds:latest'
+        context: .
+        dockerfile: Dockerfile-base
+    image: 'modispds:base'
     entrypoint: /bin/bash
     volumes:
       - '.:/work'
 
+  build:
+    build:
+        context: .
+    image: 'modispds:latest'
+
   test:
     image: 'modispds:latest'
-    entrypoint: bash -c 'pip install nose; nosetests -v -s;'
+    entrypoint: bash -c 'nosetests --with-coverage --cover-package modispds --cover-inclusive -v -s;'
     working_dir: /work
     volumes:
       - '.:/work'
@@ -24,4 +27,6 @@ services:
     image: 'modispds:latest'
     entrypoint: 'python modispds/core.py'
     working_dir: /work
+    volumes:
+      - '.:/work'
 
