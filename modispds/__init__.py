@@ -1,5 +1,5 @@
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('modispds')
 #logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.DEBUG)

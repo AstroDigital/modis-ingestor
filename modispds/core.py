@@ -8,7 +8,7 @@ from modispds.pds import push_to_s3, make_index
 import gippy
 from modispds.version import __version__
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('modispds')
 
 
 def ingest(date1, date2, outdir=''):
