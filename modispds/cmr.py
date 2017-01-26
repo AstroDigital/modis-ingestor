@@ -35,7 +35,7 @@ products = {
 }
 
 # logging
-log = logging.getLogger('modispds')
+log = logging.getLogger(__name__)
 
 
 def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):

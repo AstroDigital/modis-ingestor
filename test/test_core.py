@@ -42,6 +42,6 @@ class TestCore(unittest.TestCase):
     def test_ingest_granule(self):
         """ Ingest granule (download and save to S3) """
         fnames = ingest_granule(self.q[0], prefix='testing')
-        self.assertEqual(len(fnames), 17)
+        self.assertEqual(len(fnames), 18)
         for f in fnames:
             del_from_s3(f)
