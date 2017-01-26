@@ -37,17 +37,21 @@ def ingest_granule(gran, outdir='', bucket='modis-pds', prefix=''):
     files.extend(fnames[2:])
     index_fname = make_index(fnames[1], bname, files)
     files.append(index_fname)
+    files.append(fnames[1])
 
-    # push to s3
+    # upload files to s3
     path = get_s3_path(bname, prefix=prefix)
-    fnames = []
+    s3fnames = []
     for f in files:
-        fnames.append(push_to_s3(f, 'modis-pds', path))
+        s3fnames.append(push_to_s3(f, 'modis-pds', path))
         # cleanup
         os.remove(f)
 
+    # cleanup original download
+    os.remove(fnames[0])
+
     logger.info('Completed processing granule %s in : %ss' % (bname, time.time() - start_time))
-    return fnames
+    return s3fnames
 
 
 def convert_to_geotiff(hdf, outdir=''):
