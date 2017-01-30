@@ -26,11 +26,6 @@ class TestCMR(unittest.TestCase):
         q = query(self.date1, self.date2)
         self.assertEqual(len(q), 598)
 
-    def _test_query_5days(self):
-        """ Query CMR for five days """
-        q = query(self.date1, '2016-01-05')
-        self.assertEqual(len(q), 1497)
-
     def _test_query_30days(self):
         """ Query CMR for 30 days """
         q = query('2016-01-01', '2016-01-30')
