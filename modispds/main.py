@@ -27,10 +27,10 @@ def ingest_granule(gran, outdir='', bucket='modis-pds', prefix=''):
     logger.info('Processing tile %s' % bname)
 
     # create geotiffs
-    logger.info("Downloading granule %s" % bname)
+    logger.info('Downloading granule %s' % bname)
     fnames = download_granule(gran, outdir=outdir)
 
-    logger.info("Converting to GeoTIFFs")
+    logger.info('Converting to GeoTIFFs')
     files = convert_to_geotiff(fnames[0])
 
     # create index.html
@@ -67,6 +67,13 @@ def convert_to_geotiff(hdf, outdir=''):
         file_names.append(fname)
 
     return file_names
+
+
+def granule_exists(granule, prefix=''):
+    """ Check if the granule exists already on AWS """
+    url = granule['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
+    bname = os.path.basename(url)
+    s3path = get_s3_path(bname, prefix=prefix)
 
 
 def get_s3_path(filename, prefix=''):

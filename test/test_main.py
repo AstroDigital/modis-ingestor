@@ -1,7 +1,7 @@
 import os
 import unittest
 from modispds.cmr import query, download_granule
-from modispds.core import get_s3_path, ingest_granule, convert_to_geotiff, parse_args
+from modispds.main import get_s3_path, ingest_granule, convert_to_geotiff, parse_args
 from modispds.pds  import del_from_s3
 
 

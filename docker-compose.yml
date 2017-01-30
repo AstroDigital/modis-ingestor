@@ -25,7 +25,7 @@ services:
 
   ingest:
     image: 'modispds:latest'
-    entrypoint: 'python modispds/core.py'
+    entrypoint: 'python modispds/main.py'
     working_dir: /work
     volumes:
       - '.:/work'
