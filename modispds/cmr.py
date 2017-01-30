@@ -44,23 +44,27 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     each image.
     """
     prod, ver = product.split('.')
+
+    granules = []
+
+    date1 = parse(start_date)
+    date2 = parse(end_date)
+
     temporal = '{0}T00:00:00Z,{1}T23:59:00Z'.format(start_date, end_date)
-    start_date = parse(start_date)
-    end_date = parse(end_date)
 
     try:
         _granules = cmr.searchGranule(provider=provider, short_name=prod, version=ver,
-                                      temporal=temporal, sort_key='start_date', limit=10000)
+                                      temporal=temporal, sort_key='start_date', limit=100000)
     except HTTPError as error:
         raise ValueError('Error with CMR:', error.read())
 
     # filter dates
-    granules = []
     for gran in _granules:
         dt = gran['Granule']['Temporal']['RangeDateTime']['BeginningDateTime'].split('T')[0]
         date = parse(dt) + datetime.timedelta(days=products[prod]['day_offset'])
-        if (start_date <= date <= end_date):
+        if (date1 <= date <= date2):
             granules.append(gran)
+    log.debug("%s granules found within %s - %s" % (len(_granules), start_date, end_date))
     return granules
 
 

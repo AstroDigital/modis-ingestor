@@ -18,7 +18,7 @@ services:
 
   test:
     image: 'modispds:latest'
-    entrypoint: bash -c 'nosetests --with-coverage --cover-package modispds --cover-inclusive -v -s;'
+    entrypoint: bash -c 'nosetests --with-coverage --cover-package modispds --cover-inclusive --with-timer -v -s;'
     working_dir: /work
     volumes:
       - '.:/work'
