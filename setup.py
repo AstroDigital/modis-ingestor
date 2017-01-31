@@ -21,7 +21,7 @@ else:
     tests_require = []
 
 console_scripts = [
-    'modis-pds = modispds.core:cli'
+    'modis-pds = modispds.main:cli'
 ]
 
 setup(

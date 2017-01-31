@@ -59,7 +59,7 @@ def push_to_s3(filename, bucket, prefix=''):
 
 
 def exists(url):
-    """ Check that URL exists on S3 """
+    """ Check if this URL exists on S3 """
     s3 = boto3.client(
         's3',
         aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -76,6 +76,29 @@ def exists(url):
             return False
         else:
             raise
+
+
+def s3_list(url):
+    """ Get list of objects within bucket and path """
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
+    parts = splitall(url)
+    bucket = parts[1]
+    prefix = os.path.sep.join(parts[2:])
+
+    response = s3.list_objects_v2(
+        Bucket=bucket,
+        Prefix=prefix
+    )
+
+    filenames = []
+    if 'Contents' in response.keys():
+        for file in response['Contents']:
+            filenames.append(os.path.join('s3://%s' % bucket, file['Key']))
+    return filenames
 
 
 def del_from_s3(url):
@@ -106,4 +129,3 @@ def splitall(path):
             path = parts[0]
             allparts.insert(0, parts[1])
     return allparts
-
