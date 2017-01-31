@@ -64,7 +64,7 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
         date = parse(dt) + datetime.timedelta(days=products[prod]['day_offset'])
         if (date1 <= date <= date2):
             granules.append(gran)
-    log.debug("%s granules found within %s - %s" % (len(_granules), start_date, end_date))
+    log.debug("%s granules found within %s - %s" % (len(granules), start_date, end_date))
     return granules
 
 
