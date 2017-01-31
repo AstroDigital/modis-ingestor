@@ -1,11 +1,18 @@
 import os
+import logging
 import unittest
 from modispds.cmr import query, download_granule
-from modispds.main import get_s3_path, ingest_granule, convert_to_geotiff, parse_args
-from modispds.pds  import del_from_s3
+from modispds.main import get_s3_path, ingest_granule, granule_exists, convert_to_geotiff, parse_args
+from modispds.pds import s3_list, del_from_s3
+
+# quiet these loggers
+logging.getLogger('boto3').setLevel(logging.CRITICAL)
+logging.getLogger('botocore').setLevel(logging.CRITICAL)
+logging.getLogger('nose').setLevel(logging.CRITICAL)
+logging.getLogger('requests').setLevel(logging.CRITICAL)
 
 
-class TestCore(unittest.TestCase):
+class TestMain(unittest.TestCase):
     """ Test query and downloading from CMR """
 
     date1 = '2016-01-01'
@@ -41,7 +48,14 @@ class TestCore(unittest.TestCase):
 
     def test_ingest_granule(self):
         """ Ingest granule (download and save to S3) """
-        fnames = ingest_granule(self.q[0], prefix='testing')
-        self.assertEqual(len(fnames), 18)
+        fname = ingest_granule(self.q[0], prefix='testing')
+        self.assertEqual(fname, 'MCD43A4.A2016001.h11v12.006.2016174075640.hdf')
+        path = os.path.join('s3://modis-pds/', get_s3_path(fname, prefix='testing'))
+        fnames = s3_list(path)
+        # test that granule exists
+        self.assertTrue(granule_exists(fname))
         for f in fnames:
             del_from_s3(f)
+            # once one file has been removed the granule should not qualify as existing
+            #self.assertFalse(granule_exists(fname))
+        #self.assertFalse(granule_exists(fname))

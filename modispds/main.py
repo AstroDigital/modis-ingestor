@@ -4,11 +4,13 @@ import os
 import logging
 import argparse
 from modispds.cmr import query, download_granule
-from modispds.pds import push_to_s3, make_index
+from modispds.pds import push_to_s3, s3_list, make_index
 import gippy
 from modispds.version import __version__
 
 logger = logging.getLogger('modispds')
+
+bucket = os.getenv('BUCKET', 'modis-pds')
 
 
 def ingest(date1, date2, outdir=''):
@@ -19,7 +21,7 @@ def ingest(date1, date2, outdir=''):
         ingest_granule(gran, outdir=outdir)
 
 
-def ingest_granule(gran, outdir='', bucket='modis-pds', prefix=''):
+def ingest_granule(gran, outdir='', prefix=''):
     """ Fetch granule, process, and push to s3 """
     url = gran['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
     bname = os.path.basename(url)
@@ -43,7 +45,7 @@ def ingest_granule(gran, outdir='', bucket='modis-pds', prefix=''):
     path = get_s3_path(bname, prefix=prefix)
     s3fnames = []
     for f in files:
-        s3fnames.append(push_to_s3(f, 'modis-pds', path))
+        s3fnames.append(push_to_s3(f, bucket, path))
         # cleanup
         os.remove(f)
 
@@ -51,7 +53,7 @@ def ingest_granule(gran, outdir='', bucket='modis-pds', prefix=''):
     os.remove(fnames[0])
 
     logger.info('Completed processing granule %s in : %ss' % (bname, time.time() - start_time))
-    return s3fnames
+    return bname
 
 
 def convert_to_geotiff(hdf, outdir=''):
@@ -71,9 +73,9 @@ def convert_to_geotiff(hdf, outdir=''):
 
 def granule_exists(granule, prefix=''):
     """ Check if the granule exists already on AWS """
-    url = granule['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
-    bname = os.path.basename(url)
-    s3path = get_s3_path(bname, prefix=prefix)
+    s3path = os.path.join('s3://%s' % bucket, get_s3_path(granule, prefix=prefix))
+    urls = s3_list(s3path)
+    return True if len(urls) == 18 else False
 
 
 def get_s3_path(filename, prefix=''):

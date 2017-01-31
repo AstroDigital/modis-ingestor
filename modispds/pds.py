@@ -89,7 +89,7 @@ def s3_list(url):
     bucket = parts[1]
     prefix = os.path.sep.join(parts[2:])
 
-    response = s3.list_objects(
+    response = s3.list_objects_v2(
         Bucket=bucket,
         Prefix=prefix
     )
@@ -129,4 +129,3 @@ def splitall(path):
             path = parts[0]
             allparts.insert(0, parts[1])
     return allparts
-
