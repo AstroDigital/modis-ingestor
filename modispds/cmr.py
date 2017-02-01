@@ -27,12 +27,7 @@ EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 from pyCMR import CMR
 cmr = CMR(os.path.join(os.path.dirname(__file__), 'cmr.cfg'))
 
-# product specific settings
-products = {
-    'MCD43A4': {
-        'day_offset': 8
-    }
-}
+from .products import products
 
 # logging
 log = logging.getLogger(__name__)
@@ -43,8 +38,6 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     defined by a start date and end date. Returns metadata containing the URL of
     each image.
     """
-    prod, ver = product.split('.')
-
     granules = []
 
     date1 = parse(start_date)
@@ -53,6 +46,7 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     temporal = '{0}T00:00:00Z,{1}T23:59:00Z'.format(start_date, end_date)
 
     try:
+        prod, ver = product.split('.')
         _granules = cmr.searchGranule(provider=provider, short_name=prod, version=ver,
                                       temporal=temporal, sort_key='start_date', limit=100000)
     except HTTPError as error:
@@ -61,7 +55,7 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     # filter dates
     for gran in _granules:
         dt = gran['Granule']['Temporal']['RangeDateTime']['BeginningDateTime'].split('T')[0]
-        date = parse(dt) + datetime.timedelta(days=products[prod]['day_offset'])
+        date = parse(dt) + datetime.timedelta(days=products[product]['day_offset'])
         if (date1 <= date <= date2):
             granules.append(gran)
     log.debug("%s granules found within %s - %s" % (len(granules), start_date, end_date))

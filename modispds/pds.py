@@ -4,7 +4,6 @@ Utilities for putting data up on AWS's Public Datasets (PDS)
 import os
 import logging
 import boto3
-import botocore
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # environment variables

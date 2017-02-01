@@ -7,6 +7,7 @@ from modispds.cmr import query, download_granule
 from modispds.pds import push_to_s3, s3_list, make_index
 import gippy
 from modispds.version import __version__
+from modispds.products import products
 
 logger = logging.getLogger('modispds')
 
@@ -58,12 +59,15 @@ def ingest_granule(gran, outdir='', prefix=''):
 
 def convert_to_geotiff(hdf, outdir=''):
     bname = os.path.basename(hdf)
+    parts = bname.split('.')
+    product = parts[0] + '.' + parts[3]
+    bandnames = products[product]['bandnames']
     file_names = []
     img = gippy.GeoImage(hdf, True)
     opts = {'COMPRESS': 'DEFLATE', 'PREDICTOR': '2', 'TILED': 'YES', 'BLOCKXSIZE': '512', 'BLOCKYSIZE': '512'}
     # save each band as a TIF
     for i, band in enumerate(img):
-        fname = os.path.join(outdir, bname.replace('.hdf', '') + '_B' + str(i+1).zfill(2) + '.TIF')
+        fname = os.path.join(outdir, bname.replace('.hdf', '') + '_' + bandnames[i] + '.TIF')
         logger.info('Writing %s' % fname)
         imgout = img.select([i+1]).save(fname, overviews=True, options=opts)
         file_names.append(fname)
