@@ -45,9 +45,11 @@ class TestMain(unittest.TestCase):
         """ Convert hdf to individual GeoTIFF files """
         fnames = convert_to_geotiff(self.fnames[0], outdir=os.path.dirname(__file__))
         for f in fnames:
+            ext = os.path.splitext(f)[1]
             suffix = os.path.splitext(f)[0].split('_')[1]
             self.assertTrue(os.path.exists(f))
-            self.assertTrue(suffix in products['MCD43A4.006']['bandnames'])
+            if ext != '.ovr':
+                self.assertTrue(suffix in products['MCD43A4.006']['bandnames'])
 
     def test_ingest_granule(self):
         """ Ingest granule (download and save to S3) """
