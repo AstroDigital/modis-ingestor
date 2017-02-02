@@ -1,6 +1,7 @@
 import sys
 import time
 import os
+import datetime
 import logging
 import argparse
 from modispds.cmr import query, download_granule
@@ -26,11 +27,12 @@ def ingest_granule(gran, outdir='', prefix=''):
     """ Fetch granule, process, and push to s3 """
     url = gran['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
     bname = os.path.basename(url)
+    gid = os.path.splitext(bname)[0]
     start_time = time.time()
-    logger.info('Processing tile %s' % bname)
+    logger.info('Processing tile %s' % gid)
 
     # create geotiffs
-    logger.info('Downloading granule %s' % bname)
+    logger.info('Downloading granule %s' % gid)
     fnames = download_granule(gran, outdir=outdir)
 
     logger.info('Converting to GeoTIFFs')
@@ -53,8 +55,12 @@ def ingest_granule(gran, outdir='', prefix=''):
     # cleanup original download
     os.remove(fnames[0])
 
-    logger.info('Completed processing granule %s in : %ss' % (bname, time.time() - start_time))
-    return bname
+    logger.info('Completed processing granule %s in : %ss' % (gid, time.time() - start_time))
+    return {
+        'granuleId': gid,
+        'date': get_date(gid),
+        'download_url': os.path.join('https://%s.s3.amazonaws.com', path, 'index.html')
+    }
 
 
 def convert_to_geotiff(hdf, outdir=''):
@@ -89,9 +95,9 @@ def granule_exists(granule, prefix=''):
     return True if len(urls) == 18 else False
 
 
-def get_s3_path(filename, prefix=''):
+def get_s3_path(gid, prefix=''):
     """ Generate complete path in an S3 bucket (not including bucket name) """
-    parts = filename.split('.')
+    parts = gid.split('.')
     prod = '%s.%s' % (parts[0], parts[3])
     tile = parts[2].replace('h', '').replace('v', os.path.sep)
     date = parts[1].replace('A', '')
@@ -99,6 +105,12 @@ def get_s3_path(filename, prefix=''):
     if prefix != '':
         path = os.path.join(prefix, path)
     return path
+
+
+def get_date(gid):
+    """ Get date from granule ID """
+    d = gid.split('.')[1].replace('A', '')
+    return datetime.datetime.strptime(d, '%Y%j')
 
 
 def parse_args(args):

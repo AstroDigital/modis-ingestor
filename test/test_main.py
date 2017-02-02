@@ -1,8 +1,9 @@
 import os
 import logging
 import unittest
+import datetime
 from modispds.cmr import query, download_granule
-from modispds.main import get_s3_path, ingest_granule, granule_exists, convert_to_geotiff, parse_args
+from modispds.main import get_s3_path, ingest_granule, get_date, granule_exists, convert_to_geotiff, parse_args
 from modispds.pds import s3_list, del_from_s3
 from modispds.products import products
 
@@ -32,6 +33,12 @@ class TestMain(unittest.TestCase):
         self.assertEqual(args.start_date, self.date1)
         self.assertEqual(args.end_date, self.date1)
 
+    def test_get_date(self):
+        """ Parse date from granule id (filename) """
+        d = get_date(os.path.splitext(self.fname)[0])
+        self.assertTrue(isinstance(d, datetime.datetime))
+        self.assertEqual(d, datetime.datetime(2015, 9, 23))
+
     def test_get_s3_path(self):
         """ Get S3 pathname from file """
         truth_path = 'MCD43A4.006/12/07/2015266'
@@ -53,10 +60,20 @@ class TestMain(unittest.TestCase):
 
     def test_ingest_granule(self):
         """ Ingest granule (download and save to S3) """
-        fname = ingest_granule(self.q[0], prefix='testing')
-        self.assertEqual(fname, 'MCD43A4.A2016001.h11v12.006.2016174075640.hdf')
-        path = os.path.join('s3://modis-pds/', get_s3_path(fname, prefix='testing'))
-        fnames = s3_list(path)
+        result = ingest_granule(self.q[0], prefix='testing')
+        # granuleid
+        self.assertEqual(result['gid'], 'MCD43A4.A2016001.h11v12.006.2016174075640')
+        self.assertEqual(result['date'], datetime.date(2016, 1, 1))
+        # path
+        path = get_s3_path(result['gid'], prefix='testing')
+        self.assertEqual(path, 'MCD43A4.006/12/07/2015266')
+        # download url
+        url = os.path.join('https://modis-pds.s3.amazonaws.com', path, 'index.html')
+        self.assertEqual(result['download_url'], url)
+
+        # check remote files
+        s3path = os.path.join('s3://modis-pds/', path)
+        fnames = s3_list(s3path)
         self.assertTrue(len(fnames), 25)
         # test that granule exists
         # self.assertTrue(granule_exists(fname))
