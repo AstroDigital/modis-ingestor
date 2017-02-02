@@ -55,7 +55,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(fname, 'MCD43A4.A2016001.h11v12.006.2016174075640.hdf')
         path = os.path.join('s3://modis-pds/', get_s3_path(fname, prefix='testing'))
         fnames = s3_list(path)
-        self.assertTrue(len(fnames), 18)
+        self.assertTrue(len(fnames), 25)
         # test that granule exists
         # self.assertTrue(granule_exists(fname))
         for f in fnames:
