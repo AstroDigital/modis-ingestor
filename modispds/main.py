@@ -62,6 +62,7 @@ def convert_to_geotiff(hdf, outdir=''):
     parts = bname.split('.')
     product = parts[0] + '.' + parts[3]
     bandnames = products[product]['bandnames']
+    overviews = products[product]['overviews']
     file_names = []
     img = gippy.GeoImage(hdf, True)
     opts = {'COMPRESS': 'DEFLATE', 'PREDICTOR': '2', 'TILED': 'YES', 'BLOCKXSIZE': '512', 'BLOCKYSIZE': '512'}
@@ -69,8 +70,14 @@ def convert_to_geotiff(hdf, outdir=''):
     for i, band in enumerate(img):
         fname = os.path.join(outdir, bname.replace('.hdf', '') + '_' + bandnames[i] + '.TIF')
         logger.info('Writing %s' % fname)
-        imgout = img.select([i+1]).save(fname, overviews=True, options=opts)
+        imgout = img.select([i+1]).save(fname, options=opts)
         file_names.append(fname)
+        # add overview as separate file
+        if overviews[i]:
+            imgout = None
+            imgout = gippy.GeoImage(fname, False)
+            imgout.add_overviews()
+            file_names.append(fname + '.ovr')
 
     return file_names
 

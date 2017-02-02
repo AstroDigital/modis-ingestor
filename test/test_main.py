@@ -45,9 +45,11 @@ class TestMain(unittest.TestCase):
         """ Convert hdf to individual GeoTIFF files """
         fnames = convert_to_geotiff(self.fnames[0], outdir=os.path.dirname(__file__))
         for f in fnames:
+            ext = os.path.splitext(f)[1]
             suffix = os.path.splitext(f)[0].split('_')[1]
             self.assertTrue(os.path.exists(f))
-            self.assertTrue(suffix in products['MCD43A4.006']['bandnames'])
+            if ext != '.ovr':
+                self.assertTrue(suffix in products['MCD43A4.006']['bandnames'])
 
     def test_ingest_granule(self):
         """ Ingest granule (download and save to S3) """
@@ -55,7 +57,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(fname, 'MCD43A4.A2016001.h11v12.006.2016174075640.hdf')
         path = os.path.join('s3://modis-pds/', get_s3_path(fname, prefix='testing'))
         fnames = s3_list(path)
-        self.assertTrue(len(fnames), 18)
+        self.assertTrue(len(fnames), 25)
         # test that granule exists
         # self.assertTrue(granule_exists(fname))
         for f in fnames:
