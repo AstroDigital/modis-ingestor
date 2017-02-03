@@ -66,7 +66,7 @@ class TestMain(unittest.TestCase):
         self.assertEqual(result['date'], datetime.datetime(2016, 1, 1))
         # path
         path = get_s3_path(result['gid'], prefix='testing')
-        self.assertEqual(path, 'testing/MCD43A4.006/11/12/2015266')
+        self.assertEqual(path, 'testing/MCD43A4.006/11/12/2016001')
         # download url
         url = os.path.join('https://modis-pds.s3.amazonaws.com', path, 'index.html')
         self.assertEqual(result['download_url'], url)
