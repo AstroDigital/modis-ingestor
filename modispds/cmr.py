@@ -35,10 +35,7 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     """
     granules = []
 
-    date1 = parse(start_date)
-    date2 = parse(end_date)
-
-    temporal = '{0}T00:00:00Z,{1}T23:59:00Z'.format(start_date, end_date)
+    temporal = '{0}T00:00:00Z,{1}T23:59:00Z'.format(start_date.date(), end_date.date())
 
     try:
         prod, ver = product.split('.')
@@ -51,9 +48,9 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     for gran in _granules:
         dt = gran['Granule']['Temporal']['RangeDateTime']['BeginningDateTime'].split('T')[0]
         date = parse(dt) + datetime.timedelta(days=products[product]['day_offset'])
-        if (date1 <= date <= date2):
+        if (start_date <= date <= end_date):
             granules.append(gran)
-    log.debug("%s granules found within %s - %s" % (len(granules), start_date, end_date))
+    log.debug("%s granules found within %s - %s" % (len(granules), start_date.date(), end_date.date()))
     return granules
 
 

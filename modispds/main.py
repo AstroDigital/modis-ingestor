@@ -4,6 +4,7 @@ import os
 import datetime
 import logging
 import argparse
+from dateutil.parser import parse
 from modispds.cmr import query, download_granule
 from modispds.pds import push_to_s3, s3_list, make_index, make_scene_list
 import gippy
@@ -19,14 +20,25 @@ _PRODUCT = 'MCD43A4.006'
 bucket = os.getenv('BUCKET', 'modis-pds')
 
 
-def ingest(date1, date2, product=_PRODUCT, outdir=''):
+def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
     """ Ingest all granules between two dates """
-    granules = query(date1, date2, product=product)
+    d1 = parse(start_date)
+    d2 = parse(end_date)
+    dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
+    for day in dates:
+        granules = query(day, day, product=product)
 
-    metadata = []
-    for gran in granules:
-        metadata.append(ingest_granule(gran, outdir=outdir))
-    fname = make_scene_list(metadata)
+        metadata = []
+        for gran in granules:
+            metadata.append(ingest_granule(gran, outdir=outdir))
+        # upload index file
+        fname = make_scene_list(metadata, fout=day.date() + '_scenes.txt')
+        push_to_s3(fname, bucket, prefix=product)
+
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + datetime.timedelta(n)
 
 
 def ingest_granule(gran, outdir='', prefix=''):

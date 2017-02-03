@@ -34,7 +34,7 @@ def make_index(thumb, product, files):
     return index_fname
 
 
-def make_scene_list(metadata, fout='scene_list.txt'):
+def make_scene_list(metadata, fout='scenes.txt'):
     """ Create a scene list from metadata """
     # assume keys are same in all the metadata
     keys = sorted(metadata[0].keys())
