@@ -5,22 +5,28 @@ import datetime
 import logging
 import argparse
 from modispds.cmr import query, download_granule
-from modispds.pds import push_to_s3, s3_list, make_index
+from modispds.pds import push_to_s3, s3_list, make_index, make_scene_list
 import gippy
 from modispds.version import __version__
 from modispds.products import products
 
 logger = logging.getLogger('modispds')
 
+# default product
+_PRODUCT = 'MCD43A4.006'
+
+# environment variables
 bucket = os.getenv('BUCKET', 'modis-pds')
 
 
-def ingest(date1, date2, outdir=''):
+def ingest(date1, date2, product=_PRODUCT, outdir=''):
     """ Ingest all granules between two dates """
-    granules = query(date1, date2)
+    granules = query(date1, date2, product=product)
 
+    metadata = []
     for gran in granules:
-        ingest_granule(gran, outdir=outdir)
+        metadata.append(ingest_granule(gran, outdir=outdir))
+    fname = make_scene_list(metadata)
 
 
 def ingest_granule(gran, outdir='', prefix=''):
@@ -57,7 +63,7 @@ def ingest_granule(gran, outdir='', prefix=''):
 
     logger.info('Completed processing granule %s in : %ss' % (gid, time.time() - start_time))
     return {
-        'granuleId': gid,
+        'gid': gid,
         'date': get_date(gid),
         'download_url': os.path.join('https://%s.s3.amazonaws.com', path, 'index.html')
     }
@@ -122,13 +128,14 @@ def parse_args(args):
 
     parser.add_argument('start_date', help='First date')
     parser.add_argument('end_date', help='End date')
+    parser.add_argument('-p', '--product', default=_PRODUCT)
 
     return parser.parse_args(args)
 
 
 def cli():
     args = parse_args(sys.argv[1:])
-    ingest(args.start_date, args.end_date)
+    ingest(args.start_date, args.end_date, product=args.product)
 
 
 if __name__ == "__main__":

@@ -63,10 +63,10 @@ class TestMain(unittest.TestCase):
         result = ingest_granule(self.q[0], prefix='testing')
         # granuleid
         self.assertEqual(result['gid'], 'MCD43A4.A2016001.h11v12.006.2016174075640')
-        self.assertEqual(result['date'], datetime.date(2016, 1, 1))
+        self.assertEqual(result['date'], datetime.datetime(2016, 1, 1))
         # path
         path = get_s3_path(result['gid'], prefix='testing')
-        self.assertEqual(path, 'MCD43A4.006/12/07/2015266')
+        self.assertEqual(path, 'testing/MCD43A4.006/12/07/2015266')
         # download url
         url = os.path.join('https://modis-pds.s3.amazonaws.com', path, 'index.html')
         self.assertEqual(result['download_url'], url)

@@ -34,6 +34,18 @@ def make_index(thumb, product, files):
     return index_fname
 
 
+def make_scene_list(metadata, fout='scene_list.txt'):
+    """ Create a scene list from metadata """
+    # assume keys are same in all the metadata
+    keys = sorted(metadata[0].keys())
+    with open(fout, 'w') as f:
+        f.write(','.join(keys) + '\n')
+        for md in metadata:
+            items = [md[k] for k in keys]
+            f.write(','.join(items) + '\n')
+    return fout
+
+
 def push_to_s3(filename, bucket, prefix=''):
     """ Copy file to S3 """
     s3 = boto3.client(
