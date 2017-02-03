@@ -4,7 +4,6 @@ Client library for using NASAs CMR API for searching and downloading from NASA d
 
 import os
 import requests
-import sys
 import datetime
 from dateutil.parser import parse
 from urllib2 import HTTPError
@@ -12,22 +11,18 @@ from json import dump
 import logging
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-if sys.version_info < (3, 0):
-    from HTMLParser import HTMLParser
-else:
-    from html.parser import HTMLParser
+from html.parser import HTMLParser
+from dotenv import load_dotenv, find_dotenv
+from pyCMR import CMR
+from .products import products
 
 # get environment variables
-from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 EARTHDATA_USER = os.getenv('EARTHDATA_USER')
 EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 
-# pyCMR
-from pyCMR import CMR
+# load pyCMR configuration
 cmr = CMR(os.path.join(os.path.dirname(__file__), 'cmr.cfg'))
-
-from .products import products
 
 # logging
 log = logging.getLogger(__name__)
