@@ -7,14 +7,15 @@ from modispds.cmr import query, download_granule
 class TestCMR(unittest.TestCase):
     """ Test query and downloading from CMR """
 
-    date1 = '2016-01-01'
-    date2 = '2016-01-02'
+    date1 = parse('2016-01-01')
+    date2 = parse('2016-01-02')
+    date3 = parse('2016-01-30')
     url = 'http://e4ftl01.cr.usgs.gov//MODV6_Cmp_B/MOTA/MCD43A4.006/2016.01.01/MCD43A4.A2016001.h11v12.006.2016174075640.hdf'
 
     @classmethod
     def setUpClass(self):
         """ Setup class once by issuing a query """
-        self.q = query(parse(self.date1), parse(self.date1))
+        self.q = query(self.date1, self.date1)
 
     def test_query(self):
         """ Query CMR """
@@ -29,7 +30,7 @@ class TestCMR(unittest.TestCase):
 
     def _test_query_30days(self):
         """ Query CMR for 30 days """
-        q = query('2016-01-01', '2016-01-30')
+        q = query(self.date1, self.date3)
         self.assertEqual(len(q), 9272)
 
     def test_download(self):
