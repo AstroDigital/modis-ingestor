@@ -77,7 +77,7 @@ def ingest_granule(gran, outdir='', prefix=''):
     return {
         'gid': gid,
         'date': get_date(gid),
-        'download_url': os.path.join('https://%s.s3.amazonaws.com', path, 'index.html')
+        'download_url': os.path.join('https://%s.s3.amazonaws.com' % bucket, path, 'index.html')
     }
 
 

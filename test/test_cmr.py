@@ -1,4 +1,5 @@
 import os
+from dateutil.parser import parse
 import unittest
 from modispds.cmr import query, download_granule
 
@@ -13,7 +14,7 @@ class TestCMR(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """ Setup class once by issuing a query """
-        self.q = query(self.date1, self.date1)
+        self.q = query(parse(self.date1), parse(self.date1))
 
     def test_query(self):
         """ Query CMR """
