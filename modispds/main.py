@@ -26,6 +26,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
     d2 = parse(end_date)
     dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
     for day in dates:
+        logger.info('Processing date %s' % day.date())
         granules = query(day, day, product=product)
 
         metadata = []
@@ -34,6 +35,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
         # upload index file
         fname = make_scene_list(metadata, fout=day.date() + '_scenes.txt')
         push_to_s3(fname, bucket, prefix=product)
+        logger.info('End processing date %s' % day.date())
 
 
 def daterange(start_date, end_date):
@@ -47,13 +49,13 @@ def ingest_granule(gran, outdir='', prefix=''):
     bname = os.path.basename(url)
     gid = os.path.splitext(bname)[0]
     start_time = time.time()
-    logger.info('Processing tile %s' % gid)
+    logger.info('Processing granule %s' % gid)
 
     # create geotiffs
     logger.info('Downloading granule %s' % gid)
     fnames = download_granule(gran, outdir=outdir)
 
-    logger.info('Converting to GeoTIFFs')
+    logger.info('Converting granule to GeoTIFFs')
     files = convert_to_geotiff(fnames[0])
 
     # create index.html
