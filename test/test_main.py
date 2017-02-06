@@ -1,5 +1,4 @@
 import os
-import logging
 import unittest
 import datetime
 from dateutil.parser import parse
@@ -7,12 +6,6 @@ from modispds.cmr import query, download_granule
 import modispds.main as modis
 from modispds.pds import s3_list, del_from_s3
 from modispds.products import products
-
-# quiet these loggers
-logging.getLogger('boto3').setLevel(logging.CRITICAL)
-logging.getLogger('botocore').setLevel(logging.CRITICAL)
-logging.getLogger('nose').setLevel(logging.CRITICAL)
-logging.getLogger('requests').setLevel(logging.CRITICAL)
 
 
 class TestMain(unittest.TestCase):

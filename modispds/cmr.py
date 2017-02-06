@@ -25,7 +25,7 @@ EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 cmr = CMR(os.path.join(os.path.dirname(__file__), 'cmr.cfg'))
 
 # logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
@@ -50,7 +50,7 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
         date = parse(dt) + datetime.timedelta(days=products[product]['day_offset'])
         if (start_date <= date <= end_date):
             granules.append(gran)
-    log.debug("%s granules found within %s - %s" % (len(granules), start_date.date(), end_date.date()))
+    logger.info("%s granules found within %s - %s" % (len(granules), start_date.date(), end_date.date()))
     return granules
 
 
@@ -63,7 +63,7 @@ def download_granule(meta, outdir=''):
     # save metadata
     fn_meta = os.path.join(outdir, bname + '_meta.json')
     with open(fn_meta, 'w') as f:
-        log.info('Writing metadata to %s' % fn_meta)
+        logger.debug('Writing metadata to %s' % fn_meta)
         dump(meta, f, sort_keys=True, indent=4, ensure_ascii=False)
 
     # download hdf
@@ -91,7 +91,7 @@ def download_file(url, noauth=False, outdir=''):
     chunk_size = 1024
     try:
         with open(fout, 'wb') as f:
-            log.info('Saving %s' % fout)
+            logger.debug('Saving %s' % fout)
             for chunk in stream.iter_content(chunk_size):
                 f.write(chunk)
     except:

@@ -11,7 +11,14 @@ import gippy
 from modispds.version import __version__
 from modispds.products import products
 
-logger = logging.getLogger('modispds')
+# quiet these loggers
+logging.getLogger('boto3').setLevel(logging.CRITICAL)
+logging.getLogger('botocore').setLevel(logging.CRITICAL)
+logging.getLogger('nose').setLevel(logging.CRITICAL)
+logging.getLogger('requests').setLevel(logging.CRITICAL)
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # default product
 _PRODUCT = 'MCD43A4.006'
@@ -100,7 +107,7 @@ def convert_to_geotiff(hdf, outdir=''):
     # save each band as a TIF
     for i, band in enumerate(img):
         fname = os.path.join(outdir, bname.replace('.hdf', '') + '_' + bandnames[i] + '.TIF')
-        logger.info('Writing %s' % fname)
+        logger.debug('Writing %s' % fname)
         imgout = img.select([i+1]).save(fname, options=opts)
         file_names.append(fname)
         # add overview as separate file
