@@ -78,6 +78,7 @@ def ingest_granule(gran, outdir='', prefix=''):
 
     # upload files to s3
     path = get_s3_path(bname, prefix=prefix)
+    logger.info('Uploading files to s3://%s/%s' % (bucket, path))
     s3fnames = []
     for f in files:
         s3fnames.append(push_to_s3(f, bucket, path))
