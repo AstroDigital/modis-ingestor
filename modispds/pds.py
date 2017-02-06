@@ -41,7 +41,7 @@ def make_scene_list(metadata, fout='scenes.txt'):
     with open(fout, 'w') as f:
         f.write(','.join(keys) + '\n')
         for md in metadata:
-            items = [md[k] for k in keys]
+            items = [str(md[k]) for k in keys]
             f.write(','.join(items) + '\n')
     return fout
 
