@@ -27,7 +27,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
     dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
     for day in dates:
         index_fname = os.path.join(product, str(day.date()) + '_scenes.txt')
-        if exists(os.path.join('s3://%s' bucket, index_fname)):
+        if exists(os.path.join('s3://%s' % bucket, index_fname)):
             logger.info("Scenes for %s already processed" % day)
             continue
         logger.info('Processing date %s' % day.date())
