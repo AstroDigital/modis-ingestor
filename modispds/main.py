@@ -6,7 +6,7 @@ import logging
 import argparse
 from dateutil.parser import parse
 from modispds.cmr import query, download_granule
-from modispds.pds import push_to_s3, s3_list, make_index, make_scene_list
+from modispds.pds import push_to_s3, s3_list, make_index, make_scene_list, exists
 import gippy
 from modispds.version import __version__
 from modispds.products import products
