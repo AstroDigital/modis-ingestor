@@ -26,6 +26,10 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
     d2 = parse(end_date)
     dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
     for day in dates:
+        index_fname = os.path.join(product, str(day.date()) + '_scenes.txt')
+        if exists(os.path.join('s3://%s' bucket, index_fname)):
+            logger.info("Scenes for %s already processed" % day)
+            continue
         logger.info('Processing date %s' % day.date())
         granules = query(day, day, product=product)
 
@@ -33,7 +37,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
         for gran in granules:
             metadata.append(ingest_granule(gran, outdir=outdir))
         # upload index file
-        fname = make_scene_list(metadata, fout=str(day.date()) + '_scenes.txt')
+        fname = make_scene_list(metadata, fout=index_fname)
         push_to_s3(fname, bucket, prefix=product)
         logger.info('End processing date %s' % day.date())
 
