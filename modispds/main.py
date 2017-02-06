@@ -33,7 +33,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
         for gran in granules:
             metadata.append(ingest_granule(gran, outdir=outdir))
         # upload index file
-        fname = make_scene_list(metadata, fout=day.date() + '_scenes.txt')
+        fname = make_scene_list(metadata, fout=str(day.date()) + '_scenes.txt')
         push_to_s3(fname, bucket, prefix=product)
         logger.info('End processing date %s' % day.date())
 
