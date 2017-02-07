@@ -42,8 +42,13 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
         granules = query(day, day, product=product)
 
         metadata = []
-        for gran in granules:
-            metadata.append(ingest_granule(gran, outdir=outdir))
+        try:
+            for gran in granules:
+                metadata.append(ingest_granule(gran, outdir=outdir))
+        except RuntimeError as e:
+            logger.error('Error processing %s: %s' % (day.date(), str(e)))
+            # skip this entire date for now
+            continue
         # upload index file
         if len(granules) > 0:
             fname = make_scene_list(metadata, fout=index_fname)

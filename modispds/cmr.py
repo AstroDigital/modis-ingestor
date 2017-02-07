@@ -95,7 +95,7 @@ def download_file(url, noauth=False, outdir=''):
             for chunk in stream.iter_content(chunk_size):
                 f.write(chunk)
     except:
-        raise Exception("Problem fetching %s" % stream)
+        raise RuntimeError("Problem fetching %s" % stream)
 
     return fout
 
@@ -120,7 +120,7 @@ def get_stream(session, url, auth, previous_tries):
         link.feed(stream.text)
         return get_stream(session, link.download_link, auth, previous_tries)
     else:
-        raise Exception("Earthdata Authentication Error")
+        raise RuntimeError("Earthdata Authentication Error")
 
 
 class LinkFinder(HTMLParser):
