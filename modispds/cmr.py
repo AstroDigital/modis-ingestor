@@ -4,7 +4,6 @@ Client library for using NASAs CMR API for searching and downloading from NASA d
 
 import os
 import requests
-import sys
 import datetime
 from dateutil.parser import parse
 from urllib2 import HTTPError
@@ -12,25 +11,21 @@ from json import dump
 import logging
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
-if sys.version_info < (3, 0):
-    from HTMLParser import HTMLParser
-else:
-    from html.parser import HTMLParser
+from html.parser import HTMLParser
+from dotenv import load_dotenv, find_dotenv
+from pyCMR import CMR
+from .products import products
 
 # get environment variables
-from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 EARTHDATA_USER = os.getenv('EARTHDATA_USER')
 EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 
-# pyCMR
-from pyCMR import CMR
+# load pyCMR configuration
 cmr = CMR(os.path.join(os.path.dirname(__file__), 'cmr.cfg'))
 
-from .products import products
-
 # logging
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
@@ -40,10 +35,7 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     """
     granules = []
 
-    date1 = parse(start_date)
-    date2 = parse(end_date)
-
-    temporal = '{0}T00:00:00Z,{1}T23:59:00Z'.format(start_date, end_date)
+    temporal = '{0}T00:00:00Z,{1}T23:59:00Z'.format(start_date.date(), end_date.date())
 
     try:
         prod, ver = product.split('.')
@@ -56,9 +48,9 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     for gran in _granules:
         dt = gran['Granule']['Temporal']['RangeDateTime']['BeginningDateTime'].split('T')[0]
         date = parse(dt) + datetime.timedelta(days=products[product]['day_offset'])
-        if (date1 <= date <= date2):
+        if (start_date <= date <= end_date):
             granules.append(gran)
-    log.debug("%s granules found within %s - %s" % (len(granules), start_date, end_date))
+    logger.info("%s granules found within %s - %s" % (len(granules), start_date.date(), end_date.date()))
     return granules
 
 
@@ -71,7 +63,7 @@ def download_granule(meta, outdir=''):
     # save metadata
     fn_meta = os.path.join(outdir, bname + '_meta.json')
     with open(fn_meta, 'w') as f:
-        log.info('Writing metadata to %s' % fn_meta)
+        logger.debug('Writing metadata to %s' % fn_meta)
         dump(meta, f, sort_keys=True, indent=4, ensure_ascii=False)
 
     # download hdf
@@ -99,11 +91,11 @@ def download_file(url, noauth=False, outdir=''):
     chunk_size = 1024
     try:
         with open(fout, 'wb') as f:
-            log.info('Saving %s' % fout)
+            logger.debug('Saving %s' % fout)
             for chunk in stream.iter_content(chunk_size):
                 f.write(chunk)
     except:
-        raise Exception("Problem fetching %s" % stream)
+        raise RuntimeError("Problem fetching %s" % stream)
 
     return fout
 
@@ -128,7 +120,7 @@ def get_stream(session, url, auth, previous_tries):
         link.feed(stream.text)
         return get_stream(session, link.download_link, auth, previous_tries)
     else:
-        raise Exception("Earthdata Authentication Error")
+        raise RuntimeError("Earthdata Authentication Error")
 
 
 class LinkFinder(HTMLParser):

@@ -25,13 +25,24 @@ logger = logging.getLogger(__name__)
 
 def make_index(thumb, product, files):
     """ Create html index of files """
-    html = template.render(thumb=thumb, product=product, files=files)
+    html = template.render(thumb=thumb, product=product, files=sorted(files))
     index_fname = 'index.html'
     with open(index_fname, 'w') as outfile:
-        logger.info('Writing %s' % index_fname)
         outfile.write(html)
 
     return index_fname
+
+
+def make_scene_list(metadata, fout='scenes.txt'):
+    """ Create a scene list from metadata """
+    # assume keys are same in all the metadata
+    keys = sorted(metadata[0].keys())
+    with open(fout, 'w') as f:
+        f.write(','.join(keys) + '\n')
+        for md in metadata:
+            items = [str(md[k]) for k in keys]
+            f.write(','.join(items) + '\n')
+    return fout
 
 
 def push_to_s3(filename, bucket, prefix=''):
@@ -46,7 +57,7 @@ def push_to_s3(filename, bucket, prefix=''):
 
     ext = os.path.splitext(filename)[1]
     with open(filename, 'rb') as f:
-        logger.info('Uploading %s to: %s' % (key, bucket))
+        logger.debug('Uploading %s to: %s' % (key, bucket))
         if ext == '.html':
             content_type = 'text/html'
         elif ext == '.json':
@@ -107,7 +118,7 @@ def del_from_s3(url):
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY
     )
-    logger.info('Deleting %s' % url)
+    logger.debug('Deleting %s' % url)
     parts = splitall(url)
     bucket = parts[1]
     key = os.path.sep.join(parts[2:])

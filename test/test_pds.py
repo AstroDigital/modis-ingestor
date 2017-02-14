@@ -1,15 +1,27 @@
 import os
 import unittest
-from modispds.pds import push_to_s3, exists, s3_list, del_from_s3, make_index
+from modispds.pds import push_to_s3, exists, s3_list, del_from_s3, make_index, make_scene_list
 
 
 class TestPDS(unittest.TestCase):
     """ Test utiltiies for publishing data on AWS PDS """
 
+    metadata = [
+        {'key1': 'val1', 'key2': 'val2', 'key3': 'val3'},
+        {'key1': 'val4', 'key2': 'val5', 'key3': 'val6'},
+    ]
+
     def test_make_index(self):
         """ Create HTML index of some files """
         fname = make_index('thumbnail.jpg', 'product', ['file1.tif', 'file2.tif'])
         self.assertTrue(os.path.exists(fname))
+
+    def test_make_scene_list(self):
+        """ Create a scene list """
+        fout = make_scene_list(self.metadata)
+        self.assertTrue(os.path.exists(fout))
+        os.remove(fout)
+        self.assertFalse(os.path.exists(fout))
 
     def test_exists(self):
         """ Check for existence of fake object """
