@@ -2,7 +2,7 @@ import os
 import unittest
 import datetime
 from dateutil.parser import parse
-from modispds.cmr import query, download_granule
+from modispds.earthdata import query, download_granule
 import modispds.main as modis
 from modispds.pds import s3_list, del_from_s3
 from modispds.products import products
@@ -17,7 +17,7 @@ class TestMain(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         """ Setup class once by issuing a query """
-        self.q = query(parse(self.date1), parse(self.date1))
+        self.q = query(parse(self.date1).date(), parse(self.date1).date())
         self.fnames = download_granule(self.q[0])
 
     def test_parse_args(self):

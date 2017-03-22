@@ -4,8 +4,9 @@ import os
 import datetime
 import logging
 import argparse
+import subprocess
 from dateutil.parser import parse
-from modispds.cmr import query, download_granule
+from modispds.earthdata import query, download_granule
 from modispds.pds import push_to_s3, s3_list, make_index, make_scene_list, exists
 import gippy
 from modispds.version import __version__
@@ -33,12 +34,12 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
     d1 = parse(start_date)
     d2 = parse(end_date)
     dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
-    for day in dates:
-        index_fname = str(day.date()) + '_scenes.txt'
+    for day in [d.date() for d in dates]:
+        index_fname = str(day) + '_scenes.txt'
         if exists(os.path.join('s3://%s' % bucket, os.path.join(product, index_fname))):
             logger.info("Scenes for %s already processed" % day)
             continue
-        logger.info('Processing date %s' % day.date())
+        logger.info('Processing date %s' % day)
         granules = query(day, day, product=product)
 
         metadata = []
@@ -46,25 +47,19 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
             for gran in granules:
                 metadata.append(ingest_granule(gran, outdir=outdir))
         except RuntimeError as e:
-            logger.error('Error processing %s: %s' % (day.date(), str(e)))
+            logger.error('Error processing %s: %s' % (day, str(e)))
             # skip this entire date for now
             continue
         # upload index file
         if len(granules) > 0:
             fname = make_scene_list(metadata, fout=index_fname)
             push_to_s3(fname, bucket, prefix=product)
-        logger.info('End processing date %s' % day.date())
-
-
-def daterange(start_date, end_date):
-    for n in range(int((end_date - start_date).days)):
-        yield start_date + datetime.timedelta(n)
+        logger.info('End processing date %s' % day)
 
 
 def ingest_granule(gran, outdir='', prefix=''):
     """ Fetch granule, process, and push to s3 """
-    url = gran['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
-    bname = os.path.basename(url)
+    bname = os.path.basename(gran['links'][0]['href'])
     gid = os.path.splitext(bname)[0]
     start_time = time.time()
     logger.info('Processing granule %s' % gid)
@@ -110,18 +105,22 @@ def convert_to_geotiff(hdf, outdir=''):
     overviews = products[product]['overviews']
     file_names = []
     img = gippy.GeoImage(hdf, True)
-    opts = {'COMPRESS': 'DEFLATE', 'PREDICTOR': '2', 'TILED': 'YES', 'BLOCKXSIZE': '512', 'BLOCKYSIZE': '512'}
+    opts = {'COMPRESS': 'DEFLATE', 'PREDICTOR': '2', 'TILED': 'YES', 'BLOCKXSIZE': '512', 'BLOCKYSIZE': '512',
+            'COMPRESS_OVERVIEW': 'DEFLATE'}
     # save each band as a TIF
     for i, band in enumerate(img):
         fname = os.path.join(outdir, bname.replace('.hdf', '') + '_' + bandnames[i] + '.TIF')
         logger.debug('Writing %s' % fname)
         imgout = img.select([i+1]).save(fname, options=opts)
+        imgout = None
         file_names.append(fname)
         # add overview as separate file
         if overviews[i]:
-            imgout = None
-            imgout = gippy.GeoImage(fname, False)
-            imgout.add_overviews()
+            #from nose.tools import set_trace; set_trace()
+            cmd = 'gdaladdo -ro -r average --config COMPRESS_OVERVIEW DEFLATE %s 2 4 8' % fname
+            logger.debug('Creating overviews: %s' % cmd)
+            out = subprocess.check_output(cmd.split(' '))
+            logger.debug(out)
             file_names.append(fname + '.ovr')
 
     return file_names
