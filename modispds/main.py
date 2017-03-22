@@ -105,8 +105,7 @@ def convert_to_geotiff(hdf, outdir=''):
     overviews = products[product]['overviews']
     file_names = []
     img = gippy.GeoImage(hdf, True)
-    opts = {'COMPRESS': 'DEFLATE', 'PREDICTOR': '2', 'TILED': 'YES', 'BLOCKXSIZE': '512', 'BLOCKYSIZE': '512',
-            'COMPRESS_OVERVIEW': 'DEFLATE'}
+    opts = {'COMPRESS': 'DEFLATE', 'PREDICTOR': '2', 'TILED': 'YES', 'BLOCKXSIZE': '512', 'BLOCKYSIZE': '512'}
     # save each band as a TIF
     for i, band in enumerate(img):
         fname = os.path.join(outdir, bname.replace('.hdf', '') + '_' + bandnames[i] + '.TIF')
@@ -116,7 +115,6 @@ def convert_to_geotiff(hdf, outdir=''):
         file_names.append(fname)
         # add overview as separate file
         if overviews[i]:
-            #from nose.tools import set_trace; set_trace()
             cmd = 'gdaladdo -ro -r average --config COMPRESS_OVERVIEW DEFLATE %s 2 4 8' % fname
             logger.debug('Creating overviews: %s' % cmd)
             out = subprocess.check_output(cmd.split(' '))
