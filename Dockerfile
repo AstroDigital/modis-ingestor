@@ -1,4 +1,4 @@
-FROM modispds:base
+FROM astrodigital/modispds:base
 
 WORKDIR /build
 
