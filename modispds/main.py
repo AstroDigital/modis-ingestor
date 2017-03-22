@@ -29,14 +29,14 @@ _PRODUCT = 'MCD43A4.006'
 bucket = os.getenv('BUCKET', 'modis-pds')
 
 
-def ingest(start_date, end_date, product=_PRODUCT, outdir=''):
+def ingest(start_date, end_date, product=_PRODUCT, outdir='', overwrite=False):
     """ Ingest all granules between two dates """
     d1 = parse(start_date)
     d2 = parse(end_date)
     dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
     for day in [d.date() for d in dates]:
         index_fname = str(day) + '_scenes.txt'
-        if exists(os.path.join('s3://%s' % bucket, os.path.join(product, index_fname))):
+        if exists(os.path.join('s3://%s' % bucket, os.path.join(product, index_fname))) and not overwrite:
             logger.info("Scenes for %s already processed" % day)
             continue
         logger.info('Processing date %s' % day)
@@ -161,13 +161,14 @@ def parse_args(args):
     parser.add_argument('start_date', help='First date')
     parser.add_argument('end_date', help='End date')
     parser.add_argument('-p', '--product', default=_PRODUCT)
+    parser.add_argument('--overwrite', default=False, action='store_true')
 
     return parser.parse_args(args)
 
 
 def cli():
     args = parse_args(sys.argv[1:])
-    ingest(args.start_date, args.end_date, product=args.product)
+    ingest(args.start_date, args.end_date, product=args.product, overwrite=args.overwrite)
 
 
 if __name__ == "__main__":
