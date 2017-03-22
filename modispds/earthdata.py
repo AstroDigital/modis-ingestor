@@ -5,24 +5,20 @@ Client library for using NASAs CMR API for searching and downloading from NASA d
 import os
 import requests
 import datetime
-from dateutil.parser import parse
-from urllib2 import HTTPError
+from dateutil.parser import parse as dateparser
 from json import dump
 import logging
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from html.parser import HTMLParser
 from dotenv import load_dotenv, find_dotenv
-from pyCMR import CMR
+from cmr import GranuleQuery
 from .products import products
 
 # get environment variables
 load_dotenv(find_dotenv())
 EARTHDATA_USER = os.getenv('EARTHDATA_USER')
 EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
-
-# load pyCMR configuration
-cmr = CMR(os.path.join(os.path.dirname(__file__), 'cmr.cfg'))
 
 # logging
 logger = logging.getLogger(__name__)
@@ -33,31 +29,28 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     defined by a start date and end date. Returns metadata containing the URL of
     each image.
     """
-    granules = []
-
-    temporal = '{0}T00:00:00Z,{1}T23:59:00Z'.format(start_date.date(), end_date.date())
-
-    try:
-        prod, ver = product.split('.')
-        _granules = cmr.searchGranule(provider=provider, short_name=prod, version=ver,
-                                      temporal=temporal, sort_key='start_date', limit=100000)
-    except HTTPError as error:
-        raise ValueError('Error with CMR:', error.read())
+    q = GranuleQuery()
+    prod, ver = product.split('.')
+    q.short_name(prod).version(ver)
+    q.temporal('%sT00:00:00Z' % str(start_date), '%sT23:59:00Z' % str(end_date))
+    _granules = q.query(limit=9999999)
 
     # filter dates
+    day_offset = products[product]['day_offset']
+    granules = []
     for gran in _granules:
-        dt = gran['Granule']['Temporal']['RangeDateTime']['BeginningDateTime'].split('T')[0]
-        date = parse(dt) + datetime.timedelta(days=products[product]['day_offset'])
+        # CMR uses day 1 of window - correct this to be middle of window
+        date = (dateparser(gran['time_start'].split('T')[0]) + datetime.timedelta(days=day_offset)).date()
         if (start_date <= date <= end_date):
             granules.append(gran)
-    logger.info("%s granules found within %s - %s" % (len(granules), start_date.date(), end_date.date()))
+    logger.info("%s granules found within %s - %s" % (len(granules), start_date, end_date))
     return granules
 
 
 def download_granule(meta, outdir=''):
     """ Download granule files from metadata instance """
     # get basename
-    url = meta['Granule']['OnlineAccessURLs']['OnlineAccessURL']['URL']
+    url = str(meta['links'][0]['href'])
     bname = os.path.splitext(os.path.basename(url))[0]
 
     # save metadata
@@ -69,11 +62,11 @@ def download_granule(meta, outdir=''):
     # download hdf
     fn_hdf = download_file(url, outdir=outdir)
 
-    links = {r['Type']: r['URL'] for r in meta['Granule']['OnlineResources']['OnlineResource']}
+    links = {m['type']: m['href'] for m in meta['links'][1:] if 'type' in m}
     # download xml metadata
-    fn_metaxml = download_file(links['METADATA'], outdir=outdir)
+    fn_metaxml = download_file(links['text/xml'], outdir=outdir)
     # download browse image
-    fn_browse = download_file(links['BROWSE'], noauth=True, outdir=outdir)
+    fn_browse = download_file(links['image/jpeg'], noauth=True, outdir=outdir)
 
     return [fn_hdf, fn_browse, fn_meta, fn_metaxml]
 

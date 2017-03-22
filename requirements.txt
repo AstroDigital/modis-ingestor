@@ -6,4 +6,4 @@ requests==2.12.4
 python-dotenv==0.6.2
 future==0.16.0
 git+git://github.com/gipit/gippy.git@develop
-git+git://github.com/ghrcdaac/cmr.git@master
+git+git://github.com/jddeal/python-cmr.git@dev
