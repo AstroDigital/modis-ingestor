@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+
+  dev:
+    build:
+        context: .
+        dockerfile: Dockerfile-base
+    image: 'modispds:base'
+    entrypoint: /bin/bash
+    volumes:
+      - '.:/work'
+
+  latest:
+    build:
+        context: .
+    image: 'modispds:latest'
+    entrypoint: /bin/bash
+
+  test:
+    image: 'modispds:base'
+    entrypoint: bash -c 'nosetests --with-coverage --cover-package modispds --cover-inclusive --with-timer -v -s;'
+    working_dir: /work
+    volumes:
+      - '.:/work'
+
+  ingest:
+    image: 'modispds:latest'
+    entrypoint: 'modis-pds'
+    working_dir: /work
+    volumes:
+      - '.:/work'
+

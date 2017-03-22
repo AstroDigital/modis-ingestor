@@ -1,6 +1,9 @@
 *.TIF
+*.ovr
 *.hdf
 *.json
 *.pyc
 *.html
+*.xml
+*.jpg
 .env

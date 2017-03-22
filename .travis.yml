@@ -1,0 +1,32 @@
+
+language: python
+
+python:
+- '2.7'
+
+services:
+- docker
+
+env:
+  global:
+  - AWS_DEFAULT_REGION=us-east-1
+    # AWS_ACCESS_KEY_ID
+  - secure: AZORzNQyuiUemlQZ8gwi53Yjuw0oVMECXCys+RfP5g4rKY3SBap8oqgbL1AYzw39oRuAClFwGbi/pvn75BN2SDex5WjVrMaYfv+pplJ83WwCMDbSmVf5p6kdzWt0zNeI8WbVmLAp7t7BPEOKLMm8NgRyzMVGMnbRk+Jl0kIh1uw8TY/Ss9zVTjnpdtg9PhP3UkTcav+15oq1SzEilJOd6pOFRZPrgeY6hNDw+oQOrdBiKJ1piQirNvXurpwrx1jB+emxkVWoaWLTpkVb4baLCbtU94vx0eHaXWiadcmvrMw5rXUVddYWNquvFuB/BmkXBWl42N/Ah0/WEJFOHJL6WpIgk6lgdInjOT6O/tw0KUN58JT2TRAiSO8pH37tGGl3rvY/Ngt5ZTdFxN5KM9iO68sw/RyrWSXZfxcJQApgwxZDT2RPofexjuYvZgiAtsyDAOJikmlBrqQrv+8CQFVLKcUldk6A1LHRYYJuLvlg0IdrDJIMUGety8RgCq/eSVlCcizbb/O4/hOA3ZILex9ZCpZGmK9znATG+POcMOMrBfQA5kN9YneTKuB02lqcgnSZdY08sMJnFX2V8mGHIYiNczUaMxkyz6oy2y0ciLzM4d9BQjd8SFmJNHmXTSDc4AU4vW/MOtg19GIiuCrf4nAR9dWE+TAmCj8FoFeiZMnpO6g=
+    # AWS_SECRET_ACCESS_KEY
+  - secure: ugjPTRpOUrR0H807xAQ+aqJ7nOa7frkooj+Wf5Rqxw6V/ifjrPIMC/08bRZ64L27bj5apP1o3roaVQr8XuGmIx8Q8Z2BhFTOOiBrFbRd2i5oq7+SXcqHvMNFWsSpgCd8V2FdUuSodPPgfdLw2fldXOwzn8l5844wc8nO8qY32lQv4wX+hBqKHcx+GRIUcn7FjBrzTT6yxGylZq5vp6xGFWWgmsAoXCJn+Ccow4U+tHX2fEmYEgotORs2ZXSGs8NNZORaVhJzGFBextpAx8lbP7hFagzEOeElzZGezps7GgY+p8Qdgx+1BIEVlnpWizsRWbhn8vVx1AoQPZP2Fayx+RCSSwF3jE5zgp+XKX6Xd/tuCsyQ+cmNYE8u7NCkT6Ot/ATRtARJItSbATYdHt/GA71+xyCaaHrBf3a9QfYEwXzDO9EF4JBaV7oc58gMRv6PDSMWn9xisLrGP1+RGR3pJS4Cf5xRGFmaM7RzttWfMmDJH5NuQAKxYOztJibNbqafaQiIcZyjgb3qOmiHg43qizH9bfF8X8zuQCRj8KbOqOHJ6/sv+pBktXX/nvOzr475P95B1G+VXiTIzsDxzWPB427m+ehmIkl3gV5MzY7KeM3zbxq6seef7XHdUYEQTSHV6Xz8yUZHDjOP57awbPvrpcTKYnUTAQoyeh/quCMWTJ8=
+  - EARTHDATA_USER=devseed
+    # EARTHDATA_PASS
+  - secure: QgmUCPHfY2vAr+zqqY9HjLDhmwoGKzB+iUYhoat3V+hkzBxFwCg4I8QjESbLeC/ysQ6SFQdb+Kw4/4z1K+BQOmG3QcGuCI9us02FDLfEDicoYcQr+wRGPAvIdaZ243eKN50fP0diZffQTbefckvoq/qaucz6CMXFnDAQ6Jr93zBPgrVxYCeTIdw9d1KAqA5JCaDTbNBKCLGLEjtmlCsfpXwCWgQsd+iVgISm+M70EZxpH/Ycl210F2AG+jZcTtmHenk5LlgZ9KYpYOAoMQAuOgDUqDpuFHwfQjRL2wqoGgiyxcVyCWKwFY3TX/cm6BQxUOZ+Mnyxqd7k/k77REanjKYFwn9UXE9JOCZgYfNn6z6UlHbedaWTy7VFjwDoX9dMQNFHfoWiBosdug2n7n4uiFh6Na4JyCITmaQErGR7+kMrYV68wTkha4w7DN+pqd3Qbuju4DcW+RBGOpGOtrV5dgBgAPpScKy5Bd6x+ierRsXVF1tRgnmUQqvzvJDwumkkshGwRblMuolNHCKjTBjmfavlNlFI0l8eJxwkLN+7AeKFcVg9tGfXpdfD0s0vNmO5j0Pmv12yTy8DQNHYFBvZ298NkvXdMVo74JSR0wQbpstU5QqF16//aG/r0XjvDHl6bA0UB6Wdm8GMKFBZ9gUixFKAWnqiZjeM79fS3tp98nI=
+
+install:
+- pip install awscli docker-compose==1.8.0
+- echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION" >> .env
+- echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> .env
+- echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env
+- echo "EARTHDATA_PASS=$EARTHDATA_PASS" >> .env
+- echo "EARTHDATA_USER=$EARTHDATA_USER" >> .env
+- mv .env modispds/.env
+- docker-compose build
+
+script:
+- docker-compose run test
