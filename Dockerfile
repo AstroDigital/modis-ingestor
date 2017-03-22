@@ -6,3 +6,5 @@ COPY ./ /build/
 
 RUN \
     pip install .
+
+ENTRYPOINT ['modis-pds']
