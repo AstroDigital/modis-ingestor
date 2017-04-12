@@ -35,6 +35,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir='', overwrite=False):
     d2 = parse(end_date)
     dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
     for day in [d.date() for d in dates]:
+        start = datetime.datetime.now()
         index_fname = str(day) + '_scenes.txt'
         if exists(os.path.join('s3://%s' % bucket, os.path.join(product, index_fname))) and not overwrite:
             logger.info("Scenes for %s already processed" % day)
@@ -54,7 +55,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir='', overwrite=False):
         if len(granules) > 0:
             fname = make_scene_list(metadata, fout=index_fname)
             push_to_s3(fname, bucket, prefix=product)
-        logger.info('End processing date %s' % day)
+        logger.info('Completed processing %s: %s' % (day, datetime.datetime.now() - start))
 
 
 def ingest_granule(gran, outdir='', prefix=''):
@@ -62,13 +63,13 @@ def ingest_granule(gran, outdir='', prefix=''):
     bname = os.path.basename(gran['links'][0]['href'])
     gid = os.path.splitext(bname)[0]
     start_time = time.time()
-    logger.info('Processing granule %s' % gid)
+    logger.debug('Processing granule %s' % gid)
 
     # create geotiffs
-    logger.info('Downloading granule %s' % gid)
+    logger.debug('Downloading granule %s' % gid)
     fnames = download_granule(gran, outdir=outdir)
 
-    logger.info('Converting granule to GeoTIFFs')
+    logger.debug('Converting granule to GeoTIFFs')
     files = convert_to_geotiff(fnames[0])
 
     # create index.html
@@ -79,7 +80,7 @@ def ingest_granule(gran, outdir='', prefix=''):
 
     # upload files to s3
     path = get_s3_path(bname, prefix=prefix)
-    logger.info('Uploading files to s3://%s/%s' % (bucket, path))
+    logger.debug('Uploading files to s3://%s/%s' % (bucket, path))
     s3fnames = []
     for f in files:
         s3fnames.append(push_to_s3(f, bucket, path))
@@ -160,6 +161,7 @@ def parse_args(args):
     parser.add_argument('end_date', help='End date')
     parser.add_argument('-p', '--product', default=_PRODUCT)
     parser.add_argument('--overwrite', default=False, action='store_true')
+    parser.add_argument('--loglevel', default=2, type=int)
 
     return parser.parse_args(args)
 
