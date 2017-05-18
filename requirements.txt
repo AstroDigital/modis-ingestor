@@ -5,5 +5,5 @@ python-dateutil==2.6.0
 requests==2.12.4
 python-dotenv==0.6.2
 future==0.16.0
-git+git://github.com/gipit/gippy.git@develop
-git+git://github.com/jddeal/python-cmr.git@dev
+git+git://github.com/gipit/gippy.git@v1.0.0b8
+git+git://github.com/matthewhanson/python-cmr.git@fix/pagination
