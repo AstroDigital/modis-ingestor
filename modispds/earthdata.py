@@ -33,7 +33,7 @@ def query(start_date, end_date, product='MCD43A4.006', provider='LPDAAC_ECS'):
     prod, ver = product.split('.')
     q.short_name(prod).version(ver)
     q.temporal('%sT00:00:00Z' % str(start_date), '%sT23:59:00Z' % str(end_date))
-    _granules = q.query(limit=9999999)
+    _granules = q.get_all()
 
     # filter dates
     day_offset = products[product]['day_offset']
