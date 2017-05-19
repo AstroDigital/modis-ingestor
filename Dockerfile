@@ -5,7 +5,7 @@ WORKDIR /build
 COPY ./ /build/
 
 RUN \
-    pip install .
+    pip3 install .
 
 ENTRYPOINT ["modis-pds"]
 CMD []

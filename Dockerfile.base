@@ -1,0 +1,16 @@
+FROM debian:jessie
+
+WORKDIR /build
+COPY requirements.txt /build/requirements.txt
+COPY requirements-dev.txt /build/requirements-dev.txt
+
+RUN apt-get update; \
+    #apt-get install -y python-setuptools python-numpy python-dev libgdal-dev python-gdal gdal-bin swig git g++; \
+    apt-get install -y python-pip python-dev libgdal-dev swig git g++; \
+    pip install numpy==1.9.1;
+    #easy_install pip; pip install wheel;
+
+RUN \
+    pip3 install -r requirements.txt; \
+    pip3 install -r requirements-dev.txt;
+
