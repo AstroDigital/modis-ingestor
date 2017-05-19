@@ -33,7 +33,7 @@ def ingest(start_date, end_date, product=_PRODUCT, outdir='', overwrite=False):
     """ Ingest all granules between two dates """
     d1 = parse(start_date)
     d2 = parse(end_date)
-    dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days)]
+    dates = [d1 + datetime.timedelta(n) for n in range((d2 - d1).days + 1)]
     for day in [d.date() for d in dates]:
         start = datetime.datetime.now()
         index_fname = str(day) + '_scenes.txt'
