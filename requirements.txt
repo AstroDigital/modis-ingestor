@@ -1,9 +1,10 @@
 boto3==1.4.3
 Jinja2==2.9.4
-numpy==1.9.1
 python-dateutil==2.6.0
+appdirs==1.4.3
+urllib3==1.7.1
 requests==2.12.4
-python-dotenv==0.6.2
+python-dotenv==0.6.4
 future==0.16.0
-git+git://github.com/gipit/gippy.git@v1.0.0b8
+git+git://github.com/gipit/gippy.git@develop
 git+git://github.com/matthewhanson/python-cmr.git@fix/pagination
