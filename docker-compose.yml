@@ -7,9 +7,9 @@ services:
         context: .
         dockerfile: Dockerfile.base
     image: 'astrodigital/modispds:base'
-    entrypoint: /bin/bash
-    volumes:
-      - '.:/work'
+    #entrypoint: /bin/bash
+    #volumes:
+    #  - '.:/work'
 
   master:
     build:
