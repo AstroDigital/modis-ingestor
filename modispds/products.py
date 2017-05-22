@@ -11,27 +11,27 @@ products = {
     'MOD09GA.006': {
         'day_offset': 0,
         'bandnames':
-            ['numobs1km', 'state', 'senzen', 'senaz', 'geoflags', 'orbit', 'granule', 'numobs500m'] +
+            ['numobs1km', 'state', 'senzen', 'senaz', 'range', 'solzen', 'solaz', 'geoflags', 'orbit', 'granule', 'numobs500m'] +
             ['B%s' % str(i).zfill(2) for i in range(1, 8)] +
-            ['QC500m', 'coverage', 'obsnum', 'qscan'],
-        'overviews': ([False] * 8) + ([True] * 7) + ([False] * 4)
+            ['qc500m', 'obscov', 'obsnum', 'qscan'],
+        'overviews': ([False] * 11) + ([True] * 7) + ([False] * 4)
     },
     'MYD09GA.006': {
         'day_offset': 0,
         'bandnames':
             ['numobs1km', 'state', 'senzen', 'senaz', 'geoflags', 'orbit', 'granule', 'numobs500m'] +
             ['B%s' % str(i).zfill(2) for i in range(1, 8)] +
-            ['QC500m', 'coverage', 'obsnum', 'qscan'],
-        'overviews': ([False] * 8) + ([True] * 7) + ([False] * 4)
+            ['qc500m', 'obscov', 'obsnum', 'qscan'],
+        'overviews': ([False] * 11) + ([True] * 7) + ([False] * 4)
     },
     'MOD09GQ.006': {
         'day_offset': 0,
-        'bandnames': ['numobs', 'B01', 'B02', 'QC', 'coverage', 'obsnum', 'orbit', 'granule'],
+        'bandnames': ['numobs', 'B01', 'B02', 'qc', 'obscov', 'obsnum', 'orbit', 'granule'],
         'overviews': [False, True, True, False, False, False, False, False]
     },
     'MYD09GQ.006': {
         'day_offset': 0,
-        'bandnames': ['numobs', 'B01', 'B02', 'QC', 'coverage', 'obsnum', 'orbit', 'granule'],
+        'bandnames': ['numobs', 'B01', 'B02', 'qc', 'obscov', 'obsnum', 'orbit', 'granule'],
         'overviews': [False, True, True, False, False, False, False, False]
     }
 }

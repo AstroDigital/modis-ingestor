@@ -2,19 +2,19 @@ version: '2'
 
 services:
 
-  dev:
+  base:
     build:
         context: .
-        dockerfile: Dockerfile-base
+        dockerfile: Dockerfile.base
     image: 'astrodigital/modispds:base'
-    entrypoint: /bin/bash
-    volumes:
-      - '.:/work'
+    #entrypoint: /bin/bash
+    #volumes:
+    #  - '.:/work'
 
-  latest:
+  master:
     build:
         context: .
-    image: 'astrodigital/modispds:latest'
+    image: 'astrodigital/modispds:master'
     entrypoint: /bin/bash
 
   test:
@@ -25,7 +25,7 @@ services:
       - '.:/work'
 
   ingest:
-    image: 'astrodigital/modispds:latest'
+    image: 'astrodigital/modispds:master'
     entrypoint: 'modis-pds'
     working_dir: /work
     volumes:
