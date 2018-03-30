@@ -19,6 +19,7 @@ services:
 
   test:
     image: 'astrodigital/modispds'
+    env_file: .env
     entrypoint: bash -c 'nosetests --with-coverage --cover-package modispds --cover-inclusive --with-timer -v -s;'
     working_dir: /work
     volumes:
