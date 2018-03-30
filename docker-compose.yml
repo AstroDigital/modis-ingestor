@@ -5,27 +5,27 @@ services:
   base:
     build:
         context: .
-        dockerfile: Dockerfile.base
-    image: 'astrodigital/modispds:base'
-    #entrypoint: /bin/bash
-    #volumes:
-    #  - '.:/work'
+        dockerfile: Dockerfile
+    image: 'astrodigital/modispds'
+    entrypoint: /bin/bash
+    volumes:
+      - '.:/work'
 
   master:
     build:
         context: .
-    image: 'astrodigital/modispds:master'
+    image: 'astrodigital/modispds'
     entrypoint: /bin/bash
 
   test:
-    image: 'astrodigital/modispds:base'
+    image: 'astrodigital/modispds'
     entrypoint: bash -c 'nosetests --with-coverage --cover-package modispds --cover-inclusive --with-timer -v -s;'
     working_dir: /work
     volumes:
       - '.:/work'
 
   ingest:
-    image: 'astrodigital/modispds:master'
+    image: 'astrodigital/modispds'
     entrypoint: 'modis-pds'
     working_dir: /work
     volumes:
