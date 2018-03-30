@@ -6,5 +6,5 @@ urllib3==1.7.1
 requests==2.12.4
 python-dotenv==0.6.4
 future==0.16.0
-git+git://github.com/gipit/gippy.git@develop
-git+git://github.com/matthewhanson/python-cmr.git@fix/pagination
+gippy>=1.0.0
+python-cmr>=0.3.3

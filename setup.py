@@ -3,31 +3,26 @@ import os
 from codecs import open
 from setuptools import setup, find_packages
 import imp
+import io
 
 here = os.path.abspath(os.path.dirname(__file__))
 __version__ = imp.load_source('modispds.version', 'modispds/version.py').__version__
 
 # get the dependencies and installs
-with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
-    reqa = f.read().split('\n')
-install_requires = [x.strip() for x in reqa if 'git+' not in x]
+with io.open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    all_reqs = f.read().split('\n')
 
-fname = os.path.join(here, 'requirements-dev.txt')
-if os.path.exists(fname):
-    with open(os.path.join(here, 'requirements-dev.txt'), encoding='utf-8') as f:
-        reqs = f.read().split('\n')
-    tests_require = [x.strip() for x in reqs if 'git+' not in x]
-else:
-    tests_require = []
+install_requires = [x.strip() for x in all_reqs if 'git+' not in x]
+dependency_links = [x.strip().replace('git+', '') for x in all_reqs if 'git+' not in x]
 
 console_scripts = [
     'modis-pds = modispds.main:cli'
 ]
-
+print(install_requires)
 setup(
     name='modispds',
     version=__version__,
-    author='Drew Bollinger (drewbo), Matthew Hanson (matthewhanson)',
+    author='Matthew Hanson (matthewhanson), Drew Bollinger (drewbo)',
     description='Get MODIS data, convert to single band GeoTIFFs, and upload to S3',
     url='https://github.com/AstroDigital/modis-ingestor',
     license='MIT',
@@ -43,7 +38,5 @@ setup(
     ],
     packages=find_packages(exclude=['docs', 'test']),
     include_package_data=True,
-    entry_points={'console_scripts': console_scripts},
-    install_requires=install_requires,
-    tests_require=tests_require,
+    entry_points={'console_scripts': console_scripts}
 )
