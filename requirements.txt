@@ -6,4 +6,4 @@ urllib3==1.7.1
 requests==2.12.4
 future==0.16.0
 gippy>=1.0.0
-python-cmr>=0.3.3
+git+git://github.com/matthewhanson/python-cmr.git@fix/trailing_ampersand
