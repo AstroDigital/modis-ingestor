@@ -6,10 +6,6 @@ import logging
 import boto3
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-# environment variables
-from dotenv import load_dotenv, find_dotenv
-load_dotenv(find_dotenv())
-
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 

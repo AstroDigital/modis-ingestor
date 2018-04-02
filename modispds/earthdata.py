@@ -11,12 +11,10 @@ import logging
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from html.parser import HTMLParser
-from dotenv import load_dotenv, find_dotenv
 from cmr import GranuleQuery
 from .products import products
 
 # get environment variables
-load_dotenv(find_dotenv())
 EARTHDATA_USER = os.getenv('EARTHDATA_USER')
 EARTHDATA_PASS = os.getenv('EARTHDATA_PASS')
 
